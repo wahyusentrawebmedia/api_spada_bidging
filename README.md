@@ -12,8 +12,12 @@ This is a simple REST API boilerplate using Golang and Fiber framework.
 2. Run the server: `go run cmd/main.go`
 
 ## Folder Structure
-- `cmd/` - Entry point
-- `internal/handler/` - HTTP handlers
-- `internal/model/` - Data models
-- `internal/repository/` - Data access
-- `config/` - Configuration files
+## Database Migration
+
+Untuk melakukan migrasi database, jalankan perintah berikut di terminal:
+
+```fish
+go run internal/database/migrate.go
+```
+
+Pastikan konfigurasi database sudah benar di `config/config.yaml` sebelum menjalankan migrasi.

@@ -4,6 +4,7 @@ import "time"
 
 type PostgresConfig struct {
 	IDPerguruanTinggi string     `json:"id_perguruan_tinggi" gorm:"column:id_perguruan_tinggi"`
+	Name              string     `json:"name" gorm:"column:name"`
 	Host              string     `json:"host" gorm:"column:host"`
 	Port              int        `json:"port" gorm:"column:port"`
 	User              string     `json:"user" gorm:"column:user"`
