@@ -14,16 +14,16 @@ func NewPostgresConfigService(repo repository.PostgresConfigRepository) *Postgre
 	return &PostgresConfigService{repo: repo}
 }
 
-func (s *PostgresConfigService) Create(ctx *context.Context, cfg *model.PostgresConfig) error {
-	return s.repo.Create(ctx, cfg)
+func (s *PostgresConfigService) Create(ctx *context.Context, cfg *model.PostgresConfig) (*model.PostgresConfig, error) {
+	return nil, s.repo.Create(ctx, cfg)
 }
 
 func (s *PostgresConfigService) GetByID(ctx *context.Context, id int64) (*model.PostgresConfig, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
-func (s *PostgresConfigService) Update(ctx *context.Context, cfg *model.PostgresConfig) error {
-	return s.repo.Update(ctx, cfg)
+func (s *PostgresConfigService) Update(ctx *context.Context, cfg *model.PostgresConfig) (*model.PostgresConfig, error) {
+	return nil, s.repo.Update(ctx, cfg)
 }
 
 func (s *PostgresConfigService) Delete(ctx *context.Context, id int64) error {

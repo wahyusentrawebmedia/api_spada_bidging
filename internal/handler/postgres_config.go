@@ -3,6 +3,8 @@ package handler
 import (
 	"api/spada/internal/response"
 	"api/spada/internal/service"
+	"api/spada/internal/utils"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 ) // CreatePostgresConfig handles creating a new Postgres config
@@ -17,55 +19,83 @@ func NewPostgresConfigHandler(svc service.PostgresConfigService) *PostgresConfig
 
 // CreatePostgresConfig handles creating a new Postgres config
 func (h *PostgresConfigHandler) CreatePostgresConfig(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
 	var req response.PostgresConfigRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return cc.ErrorResponse(err.Error(), fiber.StatusBadRequest)
 	}
-	config, err := h.Service.Create(c, req)
+
+	model := req.ToModel()
+	config, err := h.Service.Create(nil, &model)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
 	}
-	return c.Status(fiber.StatusCreated).JSON(config)
+
+	return cc.SuccessResponse(config, "Postgres config created successfully")
 }
 
-// GetPostgresConfig handles fetching a Postgres config by ID
 func (h *PostgresConfigHandler) GetPostgresConfig(c *fiber.Ctx) error {
-	id := c.Params("id")
-	config, err := h.Service.GetByID()(id)
+	cc := utils.NewCustomContext(c)
+
+	idStr := c.Params("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		return cc.ErrorResponse("Invalid ID", fiber.StatusBadRequest)
 	}
-	return c.Status(fiber.StatusOK).JSON(config)
+	config, err := h.Service.GetByID(nil, id)
+	if err != nil {
+		return cc.ErrorResponse(err.Error(), fiber.StatusNotFound)
+	}
+	return cc.SuccessResponse(config, "Postgres config retrieved successfully")
 }
 
 // UpdatePostgresConfig handles updating a Postgres config by ID
 func (h *PostgresConfigHandler) UpdatePostgresConfig(c *fiber.Ctx) error {
-	id := c.Params("id")
+	cc := utils.NewCustomContext(c)
+
 	var req response.PostgresConfigRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return cc.ErrorResponse(err.Error(), fiber.StatusBadRequest)
 	}
-	config, err := h.Service.Update(id, req)
+	model := req.ToModel()
+	idStr := c.Params("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return cc.ErrorResponse("Invalid ID", fiber.StatusBadRequest)
 	}
-	return c.Status(fiber.StatusOK).JSON(config)
+	model.ID = int(id)
+	config, err := h.Service.Update(nil, &model)
+
+	if err != nil {
+		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
+	}
+	return cc.SuccessResponse(config, "Postgres config updated successfully")
 }
 
 // DeletePostgresConfig handles deleting a Postgres config by ID
 func (h *PostgresConfigHandler) DeletePostgresConfig(c *fiber.Ctx) error {
-	id := c.Params("id")
-	if err := h.Service.Delete(id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	cc := utils.NewCustomContext(c)
+
+	idStr := c.Params("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return cc.ErrorResponse("Invalid ID", fiber.StatusBadRequest)
 	}
-	return c.SendStatus(fiber.StatusNoContent)
+	if err := h.Service.Delete(nil, id); err != nil {
+		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
+	}
+	return cc.SuccessResponse(nil, "Postgres config deleted successfully")
 }
 
 // ListPostgresConfigs handles listing all Postgres configs
 func (h *PostgresConfigHandler) ListPostgresConfigs(c *fiber.Ctx) error {
-	configs, err := h.Service.List()
+	cc := utils.NewCustomContext(c)
+
+	configs, err := h.Service.List(nil)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
 	}
-	return c.Status(fiber.StatusOK).JSON(configs)
+
+	return cc.SuccessResponse(configs, "Postgres configs retrieved successfully")
 }

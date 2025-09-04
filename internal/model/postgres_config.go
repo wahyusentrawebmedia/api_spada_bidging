@@ -3,7 +3,8 @@ package model
 import "time"
 
 type PostgresConfig struct {
-	IDPerguruanTinggi string     `json:"id_perguruan_tinggi" gorm:"column:id_perguruan_tinggi"`
+	ID                int        `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	IDPerguruanTinggi int        `json:"id_perguruan_tinggi" gorm:"column:id_perguruan_tinggi;unique"`
 	Name              string     `json:"name" gorm:"column:name"`
 	Host              string     `json:"host" gorm:"column:host"`
 	Port              int        `json:"port" gorm:"column:port"`

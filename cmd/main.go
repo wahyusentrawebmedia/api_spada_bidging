@@ -15,5 +15,5 @@ func main() {
 	// Register routes
 	handler.RegisterRoutes(app)
 
-	app.Listen(":8090")
+	app.Listen(":8100")
 }
