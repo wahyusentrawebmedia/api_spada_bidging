@@ -2,6 +2,7 @@ package handler
 
 import (
 	"api/spada/internal/database"
+	"api/spada/internal/middleware"
 	"api/spada/internal/repository"
 	"api/spada/internal/service"
 
@@ -15,19 +16,26 @@ func RegisterRoutes(app *fiber.App) {
 	postgresConfigHandler := NewPostgresConfigHandler(*servicesConfig)
 	userHandler := NewUserHandler(service.NewUserService())
 
+	appSecure := app.Use(middleware.JWTCheckMiddleware())
+
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "pong"})
 	})
 
-	// User CRUD
-	app.Post("/user", userHandler.Index)
-	app.Post("/user/sync", userHandler.Sync)
-	app.Post("/user/reset", userHandler.Reset)
+	appAkademik := appSecure.Group("/akademik")
+
+	{
+		// User CRUD
+		appAkademik.Get("/users", userHandler.GetAllUsers) // Updated to use GetAllUsers
+		appAkademik.Post("/users", userHandler.Index)
+		// appAkademik.Post("/user/sync", userHandler.Sync)
+		// appSecure.Post("/user/reset", userHandler.Reset)
+	}
 
 	// Postgres Config CRUD
-	app.Get("/config/postgres", postgresConfigHandler.ListPostgresConfigs)
-	app.Post("/config/postgres", postgresConfigHandler.CreatePostgresConfig)
-	app.Get("/config/postgres/:id", postgresConfigHandler.GetPostgresConfig)
-	app.Put("/config/postgres/:id", postgresConfigHandler.UpdatePostgresConfig)
-	app.Delete("/config/postgres/:id", postgresConfigHandler.DeletePostgresConfig)
+	appSecure.Get("/config/postgres", postgresConfigHandler.ListPostgresConfigs)
+	appSecure.Post("/config/postgres", postgresConfigHandler.CreatePostgresConfig)
+	appSecure.Get("/config/postgres/:id", postgresConfigHandler.GetPostgresConfig)
+	appSecure.Put("/config/postgres/:id", postgresConfigHandler.UpdatePostgresConfig)
+	appSecure.Delete("/config/postgres/:id", postgresConfigHandler.DeletePostgresConfig)
 }

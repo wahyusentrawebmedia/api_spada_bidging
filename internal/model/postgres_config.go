@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type PostgresConfig struct {
 	ID                int        `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
@@ -12,6 +14,7 @@ type PostgresConfig struct {
 	Password          string     `json:"password" gorm:"column:password"`
 	DBName            string     `json:"dbname" gorm:"column:dbname"`
 	SSLMode           string     `json:"sslmode" gorm:"column:sslmode"`
+	Endpoint          string     `json:"endpoint" gorm:"column:endpoint"`
 	CreatedAt         time.Time  `json:"created_at" gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt         time.Time  `json:"updated_at" gorm:"column:updated_at;autoUpdateTime"`
 	DeletedAt         *time.Time `json:"deleted_at" gorm:"column:deleted_at;index"`

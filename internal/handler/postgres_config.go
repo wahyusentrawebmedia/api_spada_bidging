@@ -23,13 +23,13 @@ func (h *PostgresConfigHandler) CreatePostgresConfig(c *fiber.Ctx) error {
 
 	var req response.PostgresConfigRequest
 	if err := c.BodyParser(&req); err != nil {
-		return cc.ErrorResponse(err.Error(), fiber.StatusBadRequest)
+		return cc.ErrorResponse(err.Error())
 	}
 
 	model := req.ToModel()
 	config, err := h.Service.Create(nil, &model)
 	if err != nil {
-		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
+		return cc.ErrorResponse(err.Error())
 	}
 
 	return cc.SuccessResponse(config, "Postgres config created successfully")
@@ -41,11 +41,11 @@ func (h *PostgresConfigHandler) GetPostgresConfig(c *fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return cc.ErrorResponse("Invalid ID", fiber.StatusBadRequest)
+		return cc.ErrorResponse("Invalid ID")
 	}
 	config, err := h.Service.GetByID(nil, id)
 	if err != nil {
-		return cc.ErrorResponse(err.Error(), fiber.StatusNotFound)
+		return cc.ErrorResponse(err.Error())
 	}
 	return cc.SuccessResponse(config, "Postgres config retrieved successfully")
 }
@@ -56,19 +56,19 @@ func (h *PostgresConfigHandler) UpdatePostgresConfig(c *fiber.Ctx) error {
 
 	var req response.PostgresConfigRequest
 	if err := c.BodyParser(&req); err != nil {
-		return cc.ErrorResponse(err.Error(), fiber.StatusBadRequest)
+		return cc.ErrorResponse(err.Error())
 	}
 	model := req.ToModel()
 	idStr := c.Params("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return cc.ErrorResponse("Invalid ID", fiber.StatusBadRequest)
+		return cc.ErrorResponse("Invalid ID")
 	}
 	model.ID = int(id)
 	config, err := h.Service.Update(nil, &model)
 
 	if err != nil {
-		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
+		return cc.ErrorResponse(err.Error())
 	}
 	return cc.SuccessResponse(config, "Postgres config updated successfully")
 }
@@ -80,10 +80,10 @@ func (h *PostgresConfigHandler) DeletePostgresConfig(c *fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return cc.ErrorResponse("Invalid ID", fiber.StatusBadRequest)
+		return cc.ErrorResponse("Invalid ID")
 	}
 	if err := h.Service.Delete(nil, id); err != nil {
-		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
+		return cc.ErrorResponse(err.Error())
 	}
 	return cc.SuccessResponse(nil, "Postgres config deleted successfully")
 }
@@ -94,7 +94,7 @@ func (h *PostgresConfigHandler) ListPostgresConfigs(c *fiber.Ctx) error {
 
 	configs, err := h.Service.List(nil)
 	if err != nil {
-		return cc.ErrorResponse(err.Error(), fiber.StatusInternalServerError)
+		return cc.ErrorResponse(err.Error())
 	}
 
 	return cc.SuccessResponse(configs, "Postgres configs retrieved successfully")

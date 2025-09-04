@@ -14,6 +14,14 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
+func (r *UserRepository) GetAllUsers() ([]model.MdlUser, error) {
+	var users []model.MdlUser
+	if err := r.db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 // GetUserByID retrieves a user by their ID
 func (r *UserRepository) GetUserBgyID(id int) (*model.MdlUser, error) {
 	var user model.MdlUser
@@ -42,7 +50,7 @@ func (r *UserRepository) UpdateUser(user *model.MdlUser) error {
 
 // CreateUser creates a new user
 func (r *UserRepository) CreateUser(user *model.MdlUser) error {
-	if err := r.db.Create(user).Error; err != nil {
+	if err := r.db.Debug().Create(user).Error; err != nil {
 		return err
 	}
 	return nil

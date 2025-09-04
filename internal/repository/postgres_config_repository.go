@@ -19,6 +19,15 @@ func (r *PostgresConfigRepository) Create(ctx *context.Context, config *model.Po
 	return r.db.Create(config).Error
 }
 
+// GetByIdPeguruanTinggi retrieves a PostgresConfig by its ID
+func (r *PostgresConfigRepository) GetByIdPeguruanTinggi(ctx *context.Context, id int64) (*model.PostgresConfig, error) {
+	var config model.PostgresConfig
+	if err := r.db.Where("id_perguruan_tinggi = ?", id).First(&config).Error; err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
 func (r *PostgresConfigRepository) GetByID(ctx *context.Context, id int64) (*model.PostgresConfig, error) {
 	var config model.PostgresConfig
 	if err := r.db.First(&config, id).Error; err != nil {

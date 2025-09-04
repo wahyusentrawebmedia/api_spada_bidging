@@ -1,30 +1,11 @@
-package database
+package utils
 
 import (
 	"fmt"
 
-	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-
-var DB *gorm.DB
-
-func Connect() error {
-	user := viper.GetString("DB_USER")
-	pass := viper.GetString("DB_PASS")
-	host := viper.GetString("DB_HOST")
-	port := viper.GetString("DB_PORT")
-	name := viper.GetString("DB_NAME")
-
-	db, err := ConnectionDB(user, pass, host, port, name)
-	if err != nil {
-		return err
-	}
-
-	DB = db
-	return nil
-}
 
 func ConnectionDB(
 	user,

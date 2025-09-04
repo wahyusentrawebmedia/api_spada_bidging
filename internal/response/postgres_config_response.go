@@ -11,6 +11,7 @@ type PostgresConfigRequest struct {
 	Password          string `json:"password" binding:"required"`
 	DBName            string `json:"dbname" binding:"required"`
 	SSLMode           string `json:"sslmode"`
+	Endpoint          string `json:"endpoint" binding:"required"`
 }
 
 func (req PostgresConfigRequest) ToModel() model.PostgresConfig {
@@ -23,5 +24,6 @@ func (req PostgresConfigRequest) ToModel() model.PostgresConfig {
 		Password:          req.Password,
 		DBName:            req.DBName,
 		SSLMode:           req.SSLMode,
+		Endpoint:          req.Endpoint,
 	}
 }
