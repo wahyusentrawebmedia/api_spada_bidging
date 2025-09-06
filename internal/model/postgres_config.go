@@ -1,15 +1,20 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type PostgresConfig struct {
-	IDPerguruanTinggi string     `json:"id_perguruan_tinggi" gorm:"column:id_perguruan_tinggi"`
+	ID                int        `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	IDPerguruanTinggi int        `json:"id_perguruan_tinggi" gorm:"column:id_perguruan_tinggi;unique"`
+	Name              string     `json:"name" gorm:"column:name"`
 	Host              string     `json:"host" gorm:"column:host"`
 	Port              int        `json:"port" gorm:"column:port"`
 	User              string     `json:"user" gorm:"column:user"`
 	Password          string     `json:"password" gorm:"column:password"`
 	DBName            string     `json:"dbname" gorm:"column:dbname"`
 	SSLMode           string     `json:"sslmode" gorm:"column:sslmode"`
+	Endpoint          string     `json:"endpoint" gorm:"column:endpoint"`
 	CreatedAt         time.Time  `json:"created_at" gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt         time.Time  `json:"updated_at" gorm:"column:updated_at;autoUpdateTime"`
 	DeletedAt         *time.Time `json:"deleted_at" gorm:"column:deleted_at;index"`
