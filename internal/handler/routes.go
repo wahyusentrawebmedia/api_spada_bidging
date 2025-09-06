@@ -15,6 +15,7 @@ func RegisterRoutes(app *fiber.App) {
 
 	postgresConfigHandler := NewPostgresConfigHandler(*servicesConfig)
 	userHandler := NewUserHandler(service.NewUserService())
+	moodleHandler := NewMoodleHandler(service.NewMoodleService())
 
 	appSecure := app.Use(middleware.JWTCheckMiddleware())
 
@@ -26,10 +27,13 @@ func RegisterRoutes(app *fiber.App) {
 
 	{
 		// User CRUD
-		appAkademik.Get("/users", userHandler.GetAllUsers) // Updated to use GetAllUsers
+		appAkademik.Get("/users", userHandler.GetAllUsers)
 		appAkademik.Post("/users", userHandler.Index)
 		// appAkademik.Post("/user/sync", userHandler.Sync)
 		// appSecure.Post("/user/reset", userHandler.Reset)
+
+		// Moodle: Update password user
+		appAkademik.Post("/moodle/user/update-password", moodleHandler.UpdatePassword)
 	}
 
 	// Postgres Config CRUD
