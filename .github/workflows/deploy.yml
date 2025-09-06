@@ -24,13 +24,14 @@ jobs:
       run: |
         go mod download
         go build -o api-spada-bridging ./cmd
+        go build -o api-spada-migrate ./cmd/migrate
     
     - name: Generate environment file from secrets
       run: |
         cat > .env << EOF
         DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
-        DB_USER=${{ secrets.DB_USER || 'moodleuser' }}
-        DB_PASS=${{ secrets.DB_PASS || 'kjdkuy&ghAQA7' }}
+        DB_USER=${{ secrets.DB_USER || 'postgres' }}
+        DB_PASS=${{ secrets.DB_PASS || '' }}
         DB_PORT=${{ secrets.DB_PORT || '5432' }}
         DB_NAME=${{ secrets.DB_NAME || 'api_spada_akademik' }}
 
@@ -41,6 +42,7 @@ jobs:
       run: |
         mkdir -p deploy
         cp api-spada-bridging deploy/
+        cp api-spada-migrate deploy/
         # cp -r templates deploy/ 2>/dev/null || true
         # cp -r static deploy/ 2>/dev/null || true
         # cp -r db deploy/ 2>/dev/null || true
@@ -83,6 +85,7 @@ jobs:
 
         # Copy files
         sudo cp api-spada-bridging /opt/akademik-spada/
+        sudo cp api-spada-migrate /opt/akademik-spada/
         sudo chmod +x /opt/akademik-spada/api-spada-bridging
 
         # Copy environment file (always overwrite with latest from secrets)
@@ -96,6 +99,8 @@ jobs:
         
         # Install systemd service
         cd ~/akademik-deployment
+
+        ./api-spada-migrate
         
         sudo cp api-spada-bridging.service /etc/systemd/system/
         sudo systemctl daemon-reload
@@ -141,23 +146,23 @@ jobs:
         target: "~/akademik-deployment/"
         strip_components: 1
     
-    # - name: Execute deployment script
-    #   uses: appleboy/ssh-action@v1.0.3
-    #   with:
-    #     host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
-    #     username: ${{ secrets.SSH_USERNAME || 'root' }}
-    #     password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
-    #     port: ${{ secrets.SSH_PORT || 22 }}
-    #     script: |
-    #       cd ~/akademik-deployment
-    #       chmod +x deploy.sh
-    #       ./deploy.sh
+    - name: Execute deployment script
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
+        username: ${{ secrets.SSH_USERNAME || 'root' }}
+        password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        script: |
+          cd ~/akademik-deployment
+          chmod +x deploy.sh
+          ./deploy.sh
           
-    #       echo "=== Deployment Status ==="
-    #       sudo systemctl is-active akademik-user || true
+          echo "=== Deployment Status ==="
+          sudo systemctl is-active akademik-user || true
           
-    #       echo "=== Service Logs (last 10 lines) ==="
-    #       sudo journalctl -u akademik-user -n 10 --no-pager || true
+          echo "=== Service Logs (last 10 lines) ==="
+          sudo journalctl -u akademik-user -n 10 --no-pager || true
           
-    #       echo "=== Port Check ==="
-    #       netstat -tlnp | grep :8085 || echo "Port 8085 not found"
+          echo "=== Port Check ==="
+          netstat -tlnp | grep :8085 || echo "Port 8085 not found"
