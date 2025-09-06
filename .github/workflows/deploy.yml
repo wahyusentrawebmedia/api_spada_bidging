@@ -1,0 +1,163 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main, master, feature/cicd  ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/feature/cicd'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Build application for Linux
+      env:
+        GOOS: linux
+        GOARCH: amd64
+      run: |
+        go mod download
+        go build -o api-spada-bridging .
+    
+    - name: Generate environment file from secrets
+      run: |
+        cat > .env << EOF
+        DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
+        DB_USER=${{ secrets.DB_USER || 'moodleuser' }}
+        DB_PASS=${{ secrets.DB_PASS || 'kjdkuy&ghAQA7' }}
+        DB_PORT=${{ secrets.DB_PORT || '5432' }}
+        DB_NAME=${{ secrets.DB_NAME || 'api_spada_akademik' }}
+
+        URL_AKADEMIK_AUTH=${{ secrets.URL_AKADEMIK_AUTH || 'https://devakademik-pengaturan.sentrawebmedia.com' }}
+        EOF
+
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        cp api-spada-bridging deploy/
+        # cp -r templates deploy/ 2>/dev/null || true
+        # cp -r static deploy/ 2>/dev/null || true
+        # cp -r db deploy/ 2>/dev/null || true
+        # cp -r scripts deploy/ 2>/dev/null || true
+        cp .env deploy/
+        
+        # Create systemd service file
+        cat > deploy/api-spada-bridging.service << EOF
+        [Unit]
+        Description=Akademik User Service
+        After=network.target
+        
+        [Service]
+        Type=simple
+        User=www-data
+        WorkingDirectory=/opt/akademik-spada
+        ExecStart=/opt/akademik-spada/api-spada-bridging
+        Restart=on-failure
+        RestartSec=5
+        StandardOutput=journal
+        StandardError=journal
+        Environment=GIN_MODE=release
+        
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+        
+        # Create deployment script
+        cat > deploy/deploy.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "Starting deployment..."
+        
+        # Stop the service if it's running
+        sudo systemctl stop api-spada-bridging || true
+        
+        # Create application directory
+        sudo mkdir -p /opt/akademik-spada
+
+        # Copy files
+        sudo cp api-spada-bridging /opt/akademik-spada/
+        sudo chmod +x /opt/akademik-spada/api-spada-bridging
+
+        # Copy environment file (always overwrite with latest from secrets)
+        if [ -f ".env" ]; then
+            sudo cp .env /opt/akademik-spada/
+            echo "Environment file updated from GitHub secrets"
+        fi
+        
+        # Set ownership
+        sudo chown -R www-data:www-data /opt/akademik-spada
+        
+        # Install systemd service
+        cd ~/akademik-deployment
+        
+        sudo cp api-spada-bridging.service /etc/systemd/system/
+        sudo systemctl daemon-reload
+        sudo systemctl enable api-spada-bridging
+
+        # Start the service
+        sudo systemctl start api-spada-bridging
+
+        # Check status
+        sleep 2
+        sudo systemctl status api-spada-bridging --no-pager
+        
+        echo "Deployment completed successfully!"
+        EOF
+        
+        chmod +x deploy/deploy.sh
+    
+    - name: Deploy to VPS via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST || 'your.vps.ip.address' }}
+        username: ${{ secrets.SSH_USERNAME || 'root' }}
+        password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        script: |
+          # Create deployment directory
+          mkdir -p ~/akademik-deployment
+          cd ~/akademik-deployment
+          
+          # Clean previous deployment
+          rm -rf *
+          
+          echo "Deployment directory prepared"
+    
+    - name: Copy files to VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST || 'your.vps.ip.address' }}
+        username: ${{ secrets.SSH_USERNAME || 'root' }}
+        password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        source: "deploy/*"
+        target: "~/akademik-deployment/"
+        strip_components: 1
+    
+    # - name: Execute deployment script
+    #   uses: appleboy/ssh-action@v1.0.3
+    #   with:
+    #     host: ${{ secrets.SSH_HOST || 'your.vps.ip.address' }}
+    #     username: ${{ secrets.SSH_USERNAME || 'root' }}
+    #     password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
+    #     port: ${{ secrets.SSH_PORT || 22 }}
+    #     script: |
+    #       cd ~/akademik-deployment
+    #       chmod +x deploy.sh
+    #       ./deploy.sh
+          
+    #       echo "=== Deployment Status ==="
+    #       sudo systemctl is-active akademik-user || true
+          
+    #       echo "=== Service Logs (last 10 lines) ==="
+    #       sudo journalctl -u akademik-user -n 10 --no-pager || true
+          
+    #       echo "=== Port Check ==="
+    #       netstat -tlnp | grep :8085 || echo "Port 8085 not found"
