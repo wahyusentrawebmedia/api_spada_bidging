@@ -30,8 +30,8 @@ jobs:
       run: |
         cat > .env << EOF
         DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
-        DB_USER=${{ secrets.DB_USER || 'postgres' }}
-        DB_PASS=${{ secrets.DB_PASS || '' }}
+        DB_USER=${{ secrets.DB_USER || 'developer_spada' }}
+        DB_PASS=${{ secrets.DB_PASS || 'Pr0d@2024!Secure*Pass' }}
         DB_PORT=${{ secrets.DB_PORT || '5432' }}
         DB_NAME=${{ secrets.DB_NAME || 'api_spada_akademik' }}
 
