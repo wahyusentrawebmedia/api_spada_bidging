@@ -116,7 +116,7 @@ jobs:
     - name: Deploy to VPS via SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.SSH_HOST || 'your.vps.ip.address' }}
+        host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
         username: ${{ secrets.SSH_USERNAME || 'root' }}
         password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
         port: ${{ secrets.SSH_PORT || 22 }}
@@ -133,7 +133,7 @@ jobs:
     - name: Copy files to VPS
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: ${{ secrets.SSH_HOST || 'your.vps.ip.address' }}
+        host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
         username: ${{ secrets.SSH_USERNAME || 'root' }}
         password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
         port: ${{ secrets.SSH_PORT || 22 }}
@@ -144,7 +144,7 @@ jobs:
     # - name: Execute deployment script
     #   uses: appleboy/ssh-action@v1.0.3
     #   with:
-    #     host: ${{ secrets.SSH_HOST || 'your.vps.ip.address' }}
+    #     host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
     #     username: ${{ secrets.SSH_USERNAME || 'root' }}
     #     password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
     #     port: ${{ secrets.SSH_PORT || 22 }}
