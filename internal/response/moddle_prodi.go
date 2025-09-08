@@ -1,15 +1,15 @@
 package response
 
-type MoodleFakultasResponse struct {
+type MoodleProdiResponse struct {
 	Name        string `json:"name"`
 	IDNumber    string `json:"idnumber" validate:"required"`
 	Description string `json:"description"`
-	// Parent      int    `json:"parent"`
+	Parent      string `json:"parent"`
 }
 
-type MoodleFakultasRequest struct {
+type MoodleProdiRequest struct {
 	Name        string `json:"name" validate:"required"`
 	IDNumber    string `json:"idnumber" validate:"required"`
 	Description string `json:"description"`
-	// Parent      int    `json:"parent"`
+	Parent      string `json:"parent"`
 }

@@ -16,6 +16,7 @@ func RegisterRoutes(app *fiber.App) {
 	postgresConfigHandler := NewPostgresConfigHandler(*servicesConfig)
 	userHandler := NewUserHandler(service.NewUserService())
 	fakultasHandler := NewFakultasHandler(*service.NewMoodleFakultasService())
+	prodiHandler := NewProdisHandler(*service.NewMoodleProdiService())
 
 	appSecure := app.Use(middleware.JWTCheckMiddleware())
 
@@ -40,6 +41,10 @@ func RegisterRoutes(app *fiber.App) {
 		appAkademik.Post("/fakultas", fakultasHandler.CreateFakultas)
 		appAkademik.Post("/fakultas/sync", fakultasHandler.SyncFakultas)
 
+		// Prodi
+		appAkademik.Get("/fakultas/:id/prodi", prodiHandler.GetProdis)
+		appAkademik.Post("/fakultas/:id/prodi", prodiHandler.CreateProdis)
+		appAkademik.Post("/fakultas/:id/prodi/sync", prodiHandler.SyncProdis)
 	}
 
 	// Postgres Config CRUD

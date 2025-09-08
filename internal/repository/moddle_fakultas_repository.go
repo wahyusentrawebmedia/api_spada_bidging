@@ -43,3 +43,13 @@ func (r *MoodleFakultasRepository) GetFakultasByIDNumber(kode string) (*model.Md
 func (r *MoodleFakultasRepository) UpdateFakultas(fakultas *model.MdlCourseCategory) error {
 	return r.db.Save(fakultas).Error
 }
+
+// GetAllProdi retrieves all prodi from the database
+func (r *MoodleFakultasRepository) GetAllProdi(id string) ([]model.MdlCourseCategory, error) {
+	var prodi []model.MdlCourseCategory
+
+	if err := r.db.Debug().Where("idnumber = ?", id).Find(&prodi).Error; err != nil {
+		return nil, err
+	}
+	return prodi, nil
+}
