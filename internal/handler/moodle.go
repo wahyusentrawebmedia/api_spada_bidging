@@ -7,11 +7,11 @@ import (
 )
 
 type MoodleHandler struct {
-	Service *service.MoodleService
+	// Service *service.MoodleService
 }
 
 func NewMoodleHandler(svc *service.MoodleService) *MoodleHandler {
-	return &MoodleHandler{Service: svc}
+	return &MoodleHandler{}
 }
 
 // POST /moodle/user/update-password
@@ -24,8 +24,8 @@ func (h *MoodleHandler) UpdatePassword(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "Cannot parse JSON"})
 	}
-	if err := h.Service.UpdateUserPassword(req.UserID, req.Password); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-	}
+	// if err := h.Service.UpdateUserPassword(req.UserID, req.Password); err != nil {
+	// 	return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	// }
 	return c.JSON(fiber.Map{"success": true})
 }
