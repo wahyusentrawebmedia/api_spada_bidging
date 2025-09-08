@@ -20,23 +20,40 @@ func (s *MoodleFakultasService) AddFakultas(req response.MoodleFakultasRequest, 
 	var repoFakultas = repository.NewMoodleFakultasRepository(db)
 	var repoContext = repository.NewMoodleContextRepository(db)
 
+	// Cek apakah fakultas dengan IDNumber yang sama sudah ada
+	existingFakultas, err := repoFakultas.GetFakultasByIDNumber(req.IDNumber)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
 	var fakultas model.MdlCourseCategory
 
-	fakultas.Name = req.Name
-	fakultas.IDNumber = &req.IDNumber
-	fakultas.Description = &req.Description
+	if existingFakultas != nil && existingFakultas.ID > 0 {
+		// Jika ada, update data fakultas
+		existingFakultas.Name = req.Name
+		existingFakultas.Description = &req.Description
+		if err := repoFakultas.UpdateFakultas(existingFakultas); err != nil {
+			return nil, err
+		}
+		fakultas = *existingFakultas
+	} else {
+		// Jika tidak ada, buat baru
+		fakultas.Name = req.Name
+		fakultas.IDNumber = &req.IDNumber
+		fakultas.Description = &req.Description
 
-	if err := repoFakultas.AddNewFakultas(&fakultas); err != nil {
-		return nil, err
-	}
+		if err := repoFakultas.AddNewFakultas(&fakultas); err != nil {
+			return nil, err
+		}
 
-	context := model.MdlContext{
-		ContextLevel: 40, // Level for course category
-		InstanceID:   fakultas.ID,
-	}
+		context := model.MdlContext{
+			ContextLevel: 40, // Level for course category
+			InstanceID:   fakultas.ID,
+		}
 
-	if err := repoContext.Create(nil, &context); err != nil {
-		return nil, err
+		if err := repoContext.Create(nil, &context); err != nil {
+			return nil, err
+		}
 	}
 
 	return &fakultas, nil
