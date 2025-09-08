@@ -6,6 +6,7 @@ import (
 
 type PostgresConfig struct {
 	ID                int        `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	Type              string     `json:"type" gorm:"column:type;type:VARCHAR(10)"` // psql, mysql
 	IDPerguruanTinggi int        `json:"id_perguruan_tinggi" gorm:"column:id_perguruan_tinggi;unique"`
 	Name              string     `json:"name" gorm:"column:name"`
 	Host              string     `json:"host" gorm:"column:host"`

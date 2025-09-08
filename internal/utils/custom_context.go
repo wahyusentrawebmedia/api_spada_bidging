@@ -84,6 +84,14 @@ func (cc *CustomContext) GetGormConnectionForPerguruanTinggi() (*gorm.DB, error)
 		return nil, err
 	}
 
+	if config.Type == "mysql" {
+		db, err := ConnectionMySQL(config.User, config.Password, config.Host, fmt.Sprintf("%d", config.Port), config.DBName)
+		if err != nil {
+			return nil, err
+		}
+		return db, nil
+	}
+
 	db, err := ConnectionDB(config.User, config.Password, config.Host, fmt.Sprintf("%d", config.Port), config.DBName)
 	if err != nil {
 		return nil, err
