@@ -23,3 +23,8 @@ func JoinStrings(elements []string, sep string) string {
 	}
 	return result
 }
+
+// PtrString returns a pointer to the given string
+func PtrString(s string) *string {
+	return &s
+}
