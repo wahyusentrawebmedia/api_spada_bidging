@@ -43,7 +43,7 @@ func (s *MoodleFakultasService) AddFakultas(req response.MoodleFakultasRequest, 
 }
 
 // GetFakultas retrieves all fakultas from the database
-func (s *MoodleFakultasService) GetFakultas(req response.MoodleFakultasRequest, db *gorm.DB) ([]model.MdlCourseCategory, error) {
+func (s *MoodleFakultasService) GetFakultas(db *gorm.DB) ([]model.MdlCourseCategory, error) {
 	var repoFakultas = repository.NewMoodleFakultasRepository(db)
 
 	var fakultas []model.MdlCourseCategory

@@ -19,19 +19,15 @@ func NewFakultasHandler(service service.MoodleFakultasService) *MoodleFakultasHa
 // GET /fakultas
 func (h *MoodleFakultasHandler) GetFakultas(c *fiber.Ctx) error {
 	cc := utils.NewCustomContext(c)
-	var req response.MoodleFakultasRequest
-	if err := c.BodyParser(&req); err != nil {
-		return cc.ErrorResponse(err.Error())
-	}
 
 	db, err := cc.GetGormConnectionForPerguruanTinggi()
 	if err != nil {
-		return cc.ErrorResponse(err.Error())
+		return cc.ErrorResponse("get database connection: " + err.Error())
 	}
 
-	fakultas, err := h.service.GetFakultas(req, db)
+	fakultas, err := h.service.GetFakultas(db)
 	if err != nil {
-		return cc.ErrorResponse(err.Error())
+		return cc.ErrorResponse("get fakultas: " + err.Error())
 	}
 
 	return cc.SuccessResponse(fakultas, "Fakultas fetch successfully")
