@@ -38,6 +38,8 @@ func RegisterRoutes(app *fiber.App) {
 		// Fakultas
 		appAkademik.Get("/fakultas", fakultasHandler.GetFakultas)
 		appAkademik.Post("/fakultas", fakultasHandler.CreateFakultas)
+		appAkademik.Post("/fakultas/sync", fakultasHandler.SyncFakultas)
+
 	}
 
 	// Postgres Config CRUD

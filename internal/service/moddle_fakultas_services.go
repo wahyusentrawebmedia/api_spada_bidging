@@ -72,3 +72,18 @@ func (s *MoodleFakultasService) GetFakultas(db *gorm.DB) ([]model.MdlCourseCateg
 
 	return fakultas, nil
 }
+
+// BatchFakultasSync sync all fakultas from all perguruan tinggi and returns a list of errors if any
+func (s *MoodleFakultasService) BatchFakultasSync(req []response.MoodleFakultasRequest, db *gorm.DB) []error {
+	var errs []error
+	for _, config := range req {
+		_, err := s.AddFakultas(config, db)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return errs
+	}
+	return nil
+}

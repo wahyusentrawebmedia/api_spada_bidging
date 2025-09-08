@@ -55,3 +55,29 @@ func (h *MoodleFakultasHandler) CreateFakultas(c *fiber.Ctx) error {
 
 	return cc.SuccessResponse(fakultas, "Fakultas created successfully")
 }
+
+// POST /fakultas-batch-sync
+func (h *MoodleFakultasHandler) SyncFakultas(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	var req []response.MoodleFakultasRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	errs := h.service.BatchFakultasSync(req, db)
+	if errs != nil {
+		var errMsgs []string
+		for _, err := range errs {
+			errMsgs = append(errMsgs, err.Error())
+		}
+		return cc.ErrorResponse("Batch sync errors: " + utils.JoinStrings(errMsgs, "; "))
+	}
+
+	return cc.SuccessResponse(nil, "Fakultas sync successfully")
+}
