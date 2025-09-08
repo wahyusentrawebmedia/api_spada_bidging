@@ -33,7 +33,7 @@ jobs:
         DB_USER=${{ secrets.DB_USER || 'admin' }}
         DB_PASS=${{ secrets.DB_PASS || 'YtvAQGQx0yDX78li' }}
         DB_PORT=${{ secrets.DB_PORT || '5433' }}
-        DB_NAME=${{ secrets.DB_NAME || 'api_spada_akademik' }}
+        DB_NAME=${{ secrets.DB_NAME || 'database_akademik_user' }}
 
         URL_AKADEMIK_AUTH=${{ secrets.URL_AKADEMIK_AUTH || 'https://devakademik-pengaturan.sentrawebmedia.com' }}
         EOF
