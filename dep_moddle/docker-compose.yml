@@ -26,7 +26,7 @@ services:
     volumes:
       - 'moodle_data:/bitnami/moodle'
       - 'moodledata_data:/bitnami/moodledata'
-      - ./api_hashing.php:/bitnami/moodle/api_hashing.php
+      - ./api_hashing.php:/bitnami/moodle/api_hashing.php:ro
     depends_on:
       - mariadb
 volumes:
