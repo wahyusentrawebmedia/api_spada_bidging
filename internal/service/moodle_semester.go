@@ -1,11 +1,9 @@
 package service
-package service
 
 import (
 	"api/spada/internal/model"
 	"api/spada/internal/repository"
 	"api/spada/internal/response"
-	"api/spada/internal/utils"
 
 	"gorm.io/gorm"
 )
@@ -22,8 +20,6 @@ func (s *MoodleSemesterService) AddSemester(req response.MoodleSemesterRequest, 
 	var repoSemester = repository.NewMoodleFakultasRepository(db)
 	var repoContext = repository.NewMoodleContextRepository(db)
 	var repoCohort = repository.NewMoodleCohortRepository(db)
-	var repoUserInfoField = repository.NewMoodleUserInfoFieldRepository(db)
-	var repoUserInfoData = repository.NewMoodleUserInfoDataRepository(db)
 
 	// Cek apakah Semester dengan IDNumber yang sama sudah ada
 	existingSemester, err := repoSemester.GetFakultasByIDNumber(req.IDNumber)
@@ -94,7 +90,7 @@ func (s *MoodleSemesterService) AddSemester(req response.MoodleSemesterRequest, 
 	// if err := db.Exec(updateQuery).Error; err != nil {
 	// 	return nil, err
 	// }
-	
+
 	return &Semester, nil
 }
 

@@ -12,7 +12,7 @@ type MoodledTahunAkademikHandler struct {
 	service service.MoodleTahunAkademikService
 }
 
-func NewdTahunAkademikHandler(service service.MoodleTahunAkademikService) *MoodledTahunAkademikHandler {
+func NewTahunAkademikHandler(service service.MoodleTahunAkademikService) *MoodledTahunAkademikHandler {
 	return &MoodledTahunAkademikHandler{service: service}
 }
 
