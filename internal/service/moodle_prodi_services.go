@@ -87,7 +87,7 @@ func (s *MoodleProdiService) GetProdi(id string, db *gorm.DB) ([]model.MdlCourse
 
 // BatchProdiSync sync all Prodi from all perguruan tinggi and returns a list of errors if any
 func (s *MoodleProdiService) BatchProdiSync(req []response.MoodleProdiRequest, db *gorm.DB) []error {
-	var errs []error
+	errs := []error{}
 	for _, config := range req {
 		_, err := s.AddProdi(config, db)
 		if err != nil {
@@ -97,5 +97,5 @@ func (s *MoodleProdiService) BatchProdiSync(req []response.MoodleProdiRequest, d
 	if len(errs) > 0 {
 		return errs
 	}
-	return nil
+	return []error{}
 }

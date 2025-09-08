@@ -48,11 +48,11 @@ func RegisterRoutes(app *fiber.App) {
 		fakultasRoute.Post("/sync", fakultasHandler.SyncFakultas)
 
 		// Prodi
-		prodiRoute := appAkademik.Group("/fakultas/:id/prodi")
+		prodiRoute := appAkademik.Group("/fakultas/:id/")
 
-		prodiRoute.Get("/", prodiHandler.GetProdis)
-		prodiRoute.Post("/", prodiHandler.CreateProdis)
-		prodiRoute.Post("/sync", prodiHandler.SyncProdis)
+		prodiRoute.Get("/prodi", prodiHandler.GetProdis)
+		prodiRoute.Post("/prodi", prodiHandler.CreateProdis)
+		prodiRoute.Post("/prodi-sync", prodiHandler.SyncProdis)
 
 		// Tahun Akademik
 		tahunAkademikRoute := appAkademik.Group("/fakultas/:id/prodi/:prodi_id/tahun")
