@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"api/spada/internal/service"
-
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -10,7 +8,7 @@ type MoodleHandler struct {
 	// Service *service.MoodleService
 }
 
-func NewMoodleHandler(svc *service.MoodleService) *MoodleHandler {
+func NewMoodleHandler() *MoodleHandler {
 	return &MoodleHandler{}
 }
 
