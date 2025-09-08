@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var jwtCheckURL = "/admin/check_auth"
+var jwtCheckURL = "/spada/sessions"
 
 // JWTCheckMiddleware memvalidasi JWT dengan memanggil endpoint eksternal
 func JWTCheckMiddleware() fiber.Handler {
@@ -44,11 +44,11 @@ func JWTCheckMiddleware() fiber.Handler {
 			return cc.ErrorResponseUnauthorized("Failed to decode JWT check response")
 		}
 
-		if jwtResp.Data.IDPerguruanTinggi == nil || *jwtResp.Data.IDPerguruanTinggi == 0 {
+		if jwtResp.Data.IDPerguruanTinggi == 0 {
 			return cc.ErrorResponseUnauthorized("User ini tidak terdapat di perguruan tinggi manapun")
 		}
 
-		c.Locals("id_perguruan_tinggi", strconv.Itoa(*jwtResp.Data.IDPerguruanTinggi))
+		c.Locals("id_perguruan_tinggi", strconv.Itoa(jwtResp.Data.IDPerguruanTinggi))
 
 		if c.Locals("id_perguruan_tinggi") == "" {
 			return cc.ErrorResponseUnauthorized("id_perguruan_tinggi tidak ditemukan di token")
