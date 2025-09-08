@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: YtvAQGQx0yDX78li
+      POSTGRES_DB: database_akademik_user
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  postgres_moodle:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: YtvAQGQx0yDX78li
+      POSTGRES_DB: database_akademik_user
+    volumes:
+      - postgres_data_moodle:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: akademikuser@sentra.com
+      PGADMIN_DEFAULT_PASSWORD: tkMEYim88GvKJqSh
+    ports:
+      - "8080:80"  # Exposed to nginx
+    networks:
+      - backend
+volumes:
+  postgres_data:
+  postgres_data_moodle:
+
+networks:
+  backend:
