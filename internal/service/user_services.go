@@ -47,6 +47,26 @@ func (s *UserService) GetUserByUsername(repo *repository.UserRepository, usernam
 	return user, nil
 }
 
+// SyncUserBatch synchronizes a batch of users
+func (s *UserService) SyncUserBatch(c *utils.CustomContext, repo *repository.UserRepository, users []model.UserSyncRequest) ([]model.UserSyncResponse, error) {
+	var results []model.UserSyncResponse
+
+	for _, user := range users {
+		resp, err := s.SyncUser(c, repo, &user)
+		if err != nil {
+			results = append(results, model.UserSyncResponse{
+				Action:   false,
+				Username: user.Username,
+				Password: user.Password,
+				Pesan:    "Sinkronisasi Gagal: " + err.Error(),
+			})
+		} else {
+			results = append(results, *resp)
+		}
+	}
+	return results, nil
+}
+
 // SyncUser synchronizes user data from an external source
 func (s *UserService) SyncUser(c *utils.CustomContext, repo *repository.UserRepository, user *model.UserSyncRequest) (*model.UserSyncResponse, error) {
 	repoMahasiswa := repo

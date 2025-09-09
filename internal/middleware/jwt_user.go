@@ -4,6 +4,7 @@ import (
 	"api/spada/internal/model"
 	"api/spada/internal/utils"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -34,21 +35,18 @@ func JWTCheckMiddlewareUser() fiber.Handler {
 		}
 		req.Header.Set("Authorization", "Bearer "+token)
 
-		// Debug: Print request details
-		fmt.Println("[DEBUG] JWTCheckMiddleware - Request URL: %s", req.URL.String())
-		fmt.Println("[DEBUG] JWTCheckMiddleware - Request Headers: %v", req.Header)
-
-		// No payload for GET, but log token
-		fmt.Println("[DEBUG] JWTCheckMiddleware - Token: %s", token)
-
 		curlCmd := fmt.Sprintf(
 			`curl -X GET "%s%s" -H "Authorization: Bearer %s"`,
-			urlAkademikAuth, jwtCheckURL, token,
+			urlAkademikAuth, jwtCheckURLUser, token,
 		)
 		fmt.Println("[DEBUG] JWTCheckMiddleware - CURL: %s", curlCmd)
 
 		resp, err := client.Do(req)
 		if err != nil || resp.StatusCode != http.StatusOK {
+			if resp != nil && resp.Body != nil {
+				bodyBytes, _ := io.ReadAll(resp.Body)
+				fmt.Printf("[DEBUG] JWTCheckMiddleware - Response Body: %s\n", string(bodyBytes))
+			}
 			return cc.ErrorResponseUnauthorized("Invalid token")
 		}
 

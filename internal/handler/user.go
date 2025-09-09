@@ -91,19 +91,26 @@ func (h *UserHandler) UpdatePassword(c *fiber.Ctx) error {
 	return cc.SuccessResponse(fiber.Map{"action": true}, "Password updated successfully")
 }
 
-// // POST /user/sync
-// func (h *UserHandler) Sync(c *fiber.Ctx) error {
-// 	var req []model.UserSyncRequest
-// 	if err := c.BodyParser(&req); err != nil {
-// 		return c.Status(400).JSON(fiber.Map{"error": "Cannot parse JSON"})
-// 	}
-// 	resp := make([]model.UserSyncResponse, 0)
-// 	for _, r := range req {
-// 		result, _ := h.UserService.SyncUser(&r)
-// 		resp = append(resp, *result)
-// 	}
-// 	return c.JSON(resp)
-// }
+// POST /user/sync
+func (h *UserHandler) Sync(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	var req []model.UserSyncRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	resp, err := h.UserService.SyncUserBatch(cc, repository.NewUserRepository(db), req)
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(resp, "Users synced successfully")
+}
 
 // // POST /user/reset
 // func (h *UserHandler) Reset(c *fiber.Ctx) error {

@@ -34,13 +34,6 @@ func JWTCheckMiddleware() fiber.Handler {
 		}
 		req.Header.Set("Authorization", "Bearer "+token)
 
-		// Debug: Print request details
-		fmt.Println("[DEBUG] JWTCheckMiddleware - Request URL: %s", req.URL.String())
-		fmt.Println("[DEBUG] JWTCheckMiddleware - Request Headers: %v", req.Header)
-
-		// No payload for GET, but log token
-		fmt.Println("[DEBUG] JWTCheckMiddleware - Token: %s", token)
-
 		curlCmd := fmt.Sprintf(
 			`curl -X GET "%s%s" -H "Authorization: Bearer %s"`,
 			urlAkademikAuth, jwtCheckURL, token,
@@ -48,6 +41,7 @@ func JWTCheckMiddleware() fiber.Handler {
 		fmt.Println("[DEBUG] JWTCheckMiddleware - CURL: %s", curlCmd)
 
 		resp, err := client.Do(req)
+
 		if err != nil || resp.StatusCode != http.StatusOK {
 			return cc.ErrorResponseUnauthorized("Invalid token")
 		}
@@ -55,16 +49,25 @@ func JWTCheckMiddleware() fiber.Handler {
 		defer resp.Body.Close()
 		var jwtResp model.JWTCheckResponse
 		if err := utils.DecodeJSON(resp.Body, &jwtResp); err != nil {
+			// if os.Getenv("DEBUG_HTTP") == "1" {
+			fmt.Printf("[DEBUG] Failed to decode JWT check response: %v\n", err)
+			// }
 			return cc.ErrorResponseUnauthorized("Failed to decode JWT check response")
 		}
 
 		if jwtResp.Data.IDPerguruanTinggi == 0 {
+			// if os.Getenv("DEBUG_HTTP") == "1" {
+			fmt.Println("[DEBUG] User tidak terdapat di perguruan tinggi manapun")
+			// }
 			return cc.ErrorResponseUnauthorized("User ini tidak terdapat di perguruan tinggi manapun")
 		}
 
 		c.Locals("id_perguruan_tinggi", strconv.Itoa(jwtResp.Data.IDPerguruanTinggi))
 
 		if c.Locals("id_perguruan_tinggi") == "" {
+			// if os.Getenv("DEBUG_HTTP") == "1" {
+			fmt.Println("[DEBUG] id_perguruan_tinggi tidak ditemukan di token")
+			// }
 			return cc.ErrorResponseUnauthorized("id_perguruan_tinggi tidak ditemukan di token")
 		}
 

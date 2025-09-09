@@ -23,30 +23,23 @@ func RegisterRoutes(app *fiber.App) {
 	// moodleHandler := NewMoodleHandler(*service.NewMoodleService())
 
 	{
-		appSecureuser := app.Use(middleware.JWTCheckMiddlewareUser())
+		appSecureuser := app.Group("/dosen", middleware.JWTCheckMiddlewareUser())
 
 		// User CRUD
-		appSecureuser.Get("/dosen", userHandler.GetDetail)
-		appSecureuser.Post("/dosen", userHandler.UpdateSingle)
+		appSecureuser.Get("/", userHandler.GetDetail)
+		appSecureuser.Post("/", userHandler.UpdateSingle)
 	}
-
-	appSecure := app.Use(middleware.JWTCheckMiddleware())
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "pong"})
 	})
 
-	appAkademik := appSecure.Group("/akademik")
-
 	{
+		appAkademik := app.Group("/akademik", middleware.JWTCheckMiddleware())
+
 		// User CRUD
 		appAkademik.Get("/users", userHandler.GetAllUsers)
 		appAkademik.Post("/users", userHandler.UpdateSingle)
-		// appAkademik.Post("/user/sync", userHandler.Sync)
-		// appSecure.Post("/user/reset", userHandler.Reset)
-
-		// Moodle: Update password user
-		// appAkademik.Post("/moodle/user/update-password", moodleHandler.UpdatePassword)
 
 		// Fakultas
 		fakultasRoute := appAkademik.Group("/fakultas")
@@ -75,12 +68,24 @@ func RegisterRoutes(app *fiber.App) {
 		semesterRoute.Get("/", semesterHandler.GetdSemester)
 		semesterRoute.Post("/", semesterHandler.CreatedSemester)
 		semesterRoute.Post("/sync", semesterHandler.SyncdSemester)
+
+		// Dosen
+		DosenRoute := appAkademik.Group("")
+
+		DosenRoute.Get("/dosen", userHandler.GetAllUsers)
+		DosenRoute.Post("/dosen-sync", userHandler.Sync)
 	}
 
-	// Postgres Config CRUD
-	appSecure.Get("/config/postgres", postgresConfigHandler.ListPostgresConfigs)
-	appSecure.Post("/config/postgres", postgresConfigHandler.CreatePostgresConfig)
-	appSecure.Get("/config/postgres/:id", postgresConfigHandler.GetPostgresConfig)
-	appSecure.Put("/config/postgres/:id", postgresConfigHandler.UpdatePostgresConfig)
-	appSecure.Delete("/config/postgres/:id", postgresConfigHandler.DeletePostgresConfig)
+	{
+
+		appSecure := app.Group("config", middleware.JWTCheckMiddlewareUser())
+
+		// Postgres Config CRUD
+		appSecure.Get("/config/postgres", postgresConfigHandler.ListPostgresConfigs)
+		appSecure.Post("/config/postgres", postgresConfigHandler.CreatePostgresConfig)
+		appSecure.Get("/config/postgres/:id", postgresConfigHandler.GetPostgresConfig)
+		appSecure.Put("/config/postgres/:id", postgresConfigHandler.UpdatePostgresConfig)
+		appSecure.Delete("/config/postgres/:id", postgresConfigHandler.DeletePostgresConfig)
+	}
+
 }
