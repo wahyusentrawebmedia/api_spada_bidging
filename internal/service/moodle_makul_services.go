@@ -5,6 +5,8 @@ import (
 	"api/spada/internal/repository"
 	"api/spada/internal/response"
 	"api/spada/internal/utils"
+	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -40,13 +42,13 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 	// getParent
 	parentCategories, err := repoCategories.GetFakultasByIDNumber(parent)
 	if err != nil {
-		return err
+		return errors.New("parent kategori tidak ditemukan")
 	}
 
 	// create or update course
 	repoCourseData, err := repoCourse.GetByIDNumber(idnumber)
 	if err != nil {
-		return err
+		return errors.New("error mencari course dengan idnumber " + idnumber + ": " + err.Error())
 	}
 
 	if repoCourseData != nil && repoCourseData.ID > 0 {
@@ -59,7 +61,7 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 		// repoCourseData.StartDate = 1693526400 // strtotime('2023-09-01')
 		// repoCourseData.EndDate = 1703980800   // strtotime('2023-12-31')
 		if err := repoCourse.Update(nil, repoCourseData); err != nil {
-			return err
+			return errors.New("error mengupdate course dengan idnumber " + idnumber + ": " + err.Error())
 		}
 	} else {
 		// Create new course
@@ -75,7 +77,7 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 			Visible:  1,
 		}
 		if err := repoCourse.Create(nil, newCourse); err != nil {
-			return err
+			return errors.New("error membuat course dengan idnumber " + idnumber + ": " + err.Error())
 		}
 
 		repoCourseData = newCourse
@@ -86,14 +88,15 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 	idNumberGroup := idnumber + "_GRP"
 	group, err := repoGroups.GetByIDNumber(idNumberGroup)
 	if err != nil {
-		return err
+		return errors.New("error mencari group dengan idnumber " + idNumberGroup + ": " + err.Error())
 	}
 
 	if group != nil && group.ID > 0 {
-		// Update existing group
 		group.Name = groupName
+		group.TimeModified = time.Now().Unix()
+
 		if err := repoGroups.Update(nil, group); err != nil {
-			return err
+			return errors.New("error mengupdate group dengan idnumber " + idNumberGroup + ":, id : " + fmt.Sprintf("%d", group.ID) + " " + err.Error())
 		}
 	} else {
 		// Create new group
@@ -107,7 +110,7 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 			TimeModified:      time.Now().Unix(),
 		}
 		if err := repoGroups.Create(nil, newGroup); err != nil {
-			return err
+			return errors.New("error membuat group dengan idnumber " + idNumberGroup + ": " + err.Error())
 		}
 	}
 

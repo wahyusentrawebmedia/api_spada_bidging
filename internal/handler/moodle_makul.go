@@ -24,6 +24,8 @@ func (h *MoodleMakulHandler) SyncMakul(c *fiber.Ctx) error {
 
 	parent := c.Params("semester_id")
 
+	parent = utils.ReplaceAll(parent, "%20", " ")
+
 	var req []response.MoodleMakulRequest
 	if err := c.BodyParser(&req); err != nil {
 		return cc.ErrorResponse(err.Error())
@@ -40,7 +42,7 @@ func (h *MoodleMakulHandler) SyncMakul(c *fiber.Ctx) error {
 		for _, err := range errs {
 			errMsgs = append(errMsgs, err.Error())
 		}
-		return cc.ErrorResponse("Batch sync errors: " + utils.JoinStrings(errMsgs, "; "))
+		return cc.ErrorResponseWithArrayError(errMsgs)
 	}
 
 	return cc.SuccessResponse(nil, "Fakultas sync successfully")

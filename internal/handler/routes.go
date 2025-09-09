@@ -22,7 +22,7 @@ func RegisterRoutes(app *fiber.App) {
 	semesterHandler := NewSemesterHandler(*service.NewMoodleSemesterService())
 	makulHandler := NewMoodleMakulHandler(service.NewMoodleMakulService())
 	categoriHandler := NewCategoriesHandler(*service.NewMoodleCategoriesService())
-	// moodleHandler := NewMoodleHandler(*service.NewMoodleService())
+	groupHandler := NewGroupsHandler(*service.NewMoodleGroupsService())
 
 	{
 		appSecureuser := app.Group("/dosen", middleware.JWTCheckMiddlewareUser())
@@ -86,6 +86,15 @@ func RegisterRoutes(app *fiber.App) {
 		categoryRoute.Get("/", categoriHandler.GetCategories)
 		categoryRoute.Post("/", categoriHandler.CreateCategories)
 		categoryRoute.Post("/sync", categoriHandler.SyncCategories)
+
+		// Makul per Semester
+		makulCategoriesRoute := categoryRoute.Group("/:semester_id/makul")
+		makulCategoriesRoute.Post("/sync", makulHandler.SyncMakul)
+
+		// Groups
+		groupsRoute := appAkademik.Group("/groups")
+
+		groupsRoute.Get("/categories/:categories_id", groupHandler.GetGroupsByCategoriesID)
 
 		// Dosen
 		DosenRoute := appAkademik.Group("")
