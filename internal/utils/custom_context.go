@@ -81,24 +81,29 @@ func (cc *CustomContext) GetPerguruanTinggi() string {
 	return cc.Locals("id_perguruan_tinggi").(string)
 }
 
+var perguruanTinggiConnections = make(map[string]*gorm.DB)
+
 func (cc *CustomContext) GetGormConnectionForPerguruanTinggi() (*gorm.DB, error) {
 	config, err := cc.GetDataPerguruanTinggi()
-
 	if err != nil {
 		return nil, err
 	}
 
-	if config.Type == "mysql" {
-		db, err := ConnectionMySQL(config.User, config.Password, config.Host, fmt.Sprintf("%d", config.Port), config.DBName)
-		if err != nil {
-			return nil, err
-		}
+	key := fmt.Sprintf("%s:%s", config.Type, config.IDPerguruanTinggi)
+	if db, ok := perguruanTinggiConnections[key]; ok {
 		return db, nil
 	}
 
-	db, err := ConnectionDB(config.User, config.Password, config.Host, fmt.Sprintf("%d", config.Port), config.DBName)
+	var db *gorm.DB
+	if config.Type == "mysql" {
+		db, err = ConnectionMySQL(config.User, config.Password, config.Host, fmt.Sprintf("%d", config.Port), config.DBName)
+	} else {
+		db, err = ConnectionDB(config.User, config.Password, config.Host, fmt.Sprintf("%d", config.Port), config.DBName)
+	}
 	if err != nil {
 		return nil, err
 	}
+
+	perguruanTinggiConnections[key] = db
 	return db, nil
 }
