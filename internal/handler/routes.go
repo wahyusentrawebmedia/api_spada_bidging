@@ -20,6 +20,7 @@ func RegisterRoutes(app *fiber.App) {
 	prodiHandler := NewProdisHandler(*service.NewMoodleProdiService())
 	tahunHandler := NewTahunAkademikHandler(*service.NewMoodleTahunAkademikService())
 	semesterHandler := NewSemesterHandler(*service.NewMoodleSemesterService())
+	makulHandler := NewMoodleMakulHandler(service.NewMoodleMakulService())
 	// moodleHandler := NewMoodleHandler(*service.NewMoodleService())
 
 	{
@@ -68,6 +69,13 @@ func RegisterRoutes(app *fiber.App) {
 		semesterRoute.Get("/", semesterHandler.GetdSemester)
 		semesterRoute.Post("/", semesterHandler.CreatedSemester)
 		semesterRoute.Post("/sync", semesterHandler.SyncdSemester)
+
+		// Makul
+		makulRoute := appAkademik.Group("/fakultas/:id/prodi/:prodi_id/tahun/:tahun_id/semester/:semester_id/makul")
+
+		// makulRoute.Get("/", makulHandler.GetMakul)
+		// makulRoute.Post("/", makulHandler.CreateMakul)
+		makulRoute.Post("/sync", makulHandler.SyncMakul)
 
 		// Dosen
 		DosenRoute := appAkademik.Group("")
