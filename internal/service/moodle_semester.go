@@ -21,6 +21,11 @@ func (s *MoodleSemesterService) AddSemester(req response.MoodleSemesterRequest, 
 	var repoContext = repository.NewMoodleContextRepository(db)
 	var repoCohort = repository.NewMoodleCohortRepository(db)
 
+	// getParent
+	fakultas, err := repoSemester.GetFakultasByIDNumber(req.Parent)
+	if err != nil {
+		return nil, err
+	}
 	// Cek apakah Semester dengan IDNumber yang sama sudah ada
 	existingSemester, err := repoSemester.GetFakultasByIDNumber(req.IDNumber)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -31,17 +36,20 @@ func (s *MoodleSemesterService) AddSemester(req response.MoodleSemesterRequest, 
 
 	if existingSemester != nil && existingSemester.ID > 0 {
 		// Jika ada, update data Semester
+		existingSemester.IDNumber = &req.IDNumber
 		existingSemester.Name = req.Name
 		existingSemester.Description = &req.Description
+		existingSemester.Parent = fakultas.ID
 		if err := repoSemester.UpdateFakultas(existingSemester); err != nil {
 			return nil, err
 		}
 		Semester = *existingSemester
 	} else {
 		// Jika tidak ada, buat baru
-		Semester.Name = req.Name
 		Semester.IDNumber = &req.IDNumber
+		Semester.Name = req.Name
 		Semester.Description = &req.Description
+		Semester.Parent = fakultas.ID
 
 		if err := repoSemester.AddNewFakultas(&Semester); err != nil {
 			return nil, err
