@@ -130,3 +130,18 @@ func (s *MoodleSemesterService) BatchSemesterSync(req []response.MoodleSemesterR
 	}
 	return nil
 }
+
+// GetDetailSemesterByNumberId retrieves a Semester by its IDNumber
+func (s *MoodleSemesterService) GetDetailSemesterByNumberId(idnumber string, db *gorm.DB) (*model.MdlCourseCategory, error) {
+	var repoSemester = repository.NewMoodleFakultasRepository(db)
+
+	Semester, err := repoSemester.GetFakultasByIDNumber(idnumber)
+	if err != nil {
+		return nil, err
+	}
+	if Semester == nil {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return Semester, nil
+}

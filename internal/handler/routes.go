@@ -21,6 +21,7 @@ func RegisterRoutes(app *fiber.App) {
 	tahunHandler := NewTahunAkademikHandler(*service.NewMoodleTahunAkademikService())
 	semesterHandler := NewSemesterHandler(*service.NewMoodleSemesterService())
 	makulHandler := NewMoodleMakulHandler(service.NewMoodleMakulService())
+	categoriHandler := NewCategoriesHandler(*service.NewMoodleCategoriesService())
 	// moodleHandler := NewMoodleHandler(*service.NewMoodleService())
 
 	{
@@ -69,6 +70,7 @@ func RegisterRoutes(app *fiber.App) {
 		semesterRoute.Get("/", semesterHandler.GetdSemester)
 		semesterRoute.Post("/", semesterHandler.CreatedSemester)
 		semesterRoute.Post("/sync", semesterHandler.SyncdSemester)
+		semesterRoute.Get("/:semester_id", semesterHandler.GetDetailSemester)
 
 		// Makul
 		makulRoute := appAkademik.Group("/fakultas/:id/prodi/:prodi_id/tahun/:tahun_id/semester/:semester_id/makul")
@@ -76,6 +78,14 @@ func RegisterRoutes(app *fiber.App) {
 		// makulRoute.Get("/", makulHandler.GetMakul)
 		// makulRoute.Post("/", makulHandler.CreateMakul)
 		makulRoute.Post("/sync", makulHandler.SyncMakul)
+
+		// Categories
+		categoryRoute := appAkademik.Group("/categories")
+
+		categoryRoute.Get("/prefix/:prefix", categoriHandler.GetCategoriesWithPrefix)
+		categoryRoute.Get("/", categoriHandler.GetCategories)
+		categoryRoute.Post("/", categoriHandler.CreateCategories)
+		categoryRoute.Post("/sync", categoriHandler.SyncCategories)
 
 		// Dosen
 		DosenRoute := appAkademik.Group("")

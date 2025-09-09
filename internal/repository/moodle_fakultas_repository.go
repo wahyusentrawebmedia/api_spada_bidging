@@ -58,3 +58,23 @@ func (r *MoodleFakultasRepository) GetAllProdi(kodeFakultas string) ([]model.Mdl
 	}
 	return prodi, nil
 }
+
+// GetWithPrefix retrieves all fakultas with a specific prefix in their IDNumber
+func (r *MoodleFakultasRepository) GetWithPrefix(prefix string) ([]model.MdlCourseCategory, error) {
+	var fakultas []model.MdlCourseCategory
+
+	if err := r.db.Where("idnumber LIKE ?", prefix+"%").Find(&fakultas).Error; err != nil {
+		return nil, err
+	}
+	return fakultas, nil
+}
+
+// GetWithPrefixEnd retrieves all fakultas with a specific prefix in their IDNumber
+func (r *MoodleFakultasRepository) GetWithPrefixEnd(prefix string) ([]model.MdlCourseCategory, error) {
+	var fakultas []model.MdlCourseCategory
+
+	if err := r.db.Debug().Where("idnumber LIKE ?", "%"+prefix).Find(&fakultas).Error; err != nil {
+		return nil, err
+	}
+	return fakultas, nil
+}
