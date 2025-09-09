@@ -15,5 +15,7 @@ func main() {
 	// Register routes
 	handler.RegisterRoutes(app)
 
-	app.Listen(":8100")
+	if err := app.Listen(":8100"); err != nil {
+		panic(err)
+	}
 }

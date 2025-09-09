@@ -30,12 +30,19 @@ func (s *MoodleTahunAkademikService) AddTahunAkademik(req response.MoodleTahunAk
 		return nil, err
 	}
 
+	prodi, err := repoTahunAkademik.GetFakultasByIDNumber(req.Parent)
+	if err != nil {
+		return nil, err
+	}
+
 	var TahunAkademik model.MdlCourseCategory
 
 	if existingTahunAkademik != nil && existingTahunAkademik.ID > 0 {
 		// Jika ada, update data TahunAkademik
 		existingTahunAkademik.Name = req.Name
 		existingTahunAkademik.Description = &req.Description
+		existingTahunAkademik.Parent = prodi.ID
+
 		if err := repoTahunAkademik.UpdateFakultas(existingTahunAkademik); err != nil {
 			return nil, err
 		}
@@ -45,6 +52,7 @@ func (s *MoodleTahunAkademikService) AddTahunAkademik(req response.MoodleTahunAk
 		TahunAkademik.Name = req.Name
 		TahunAkademik.IDNumber = &req.IDNumber
 		TahunAkademik.Description = &req.Description
+		TahunAkademik.Parent = prodi.ID
 
 		if err := repoTahunAkademik.AddNewFakultas(&TahunAkademik); err != nil {
 			return nil, err
