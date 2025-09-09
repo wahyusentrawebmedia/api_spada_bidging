@@ -22,6 +22,14 @@ func RegisterRoutes(app *fiber.App) {
 	semesterHandler := NewSemesterHandler(*service.NewMoodleSemesterService())
 	// moodleHandler := NewMoodleHandler(*service.NewMoodleService())
 
+	{
+		appSecureuser := app.Use(middleware.JWTCheckMiddlewareUser())
+
+		// User CRUD
+		appSecureuser.Get("/dosen", userHandler.GetDetail)
+		appSecureuser.Post("/dosen", userHandler.UpdateSingle)
+	}
+
 	appSecure := app.Use(middleware.JWTCheckMiddleware())
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
@@ -33,7 +41,7 @@ func RegisterRoutes(app *fiber.App) {
 	{
 		// User CRUD
 		appAkademik.Get("/users", userHandler.GetAllUsers)
-		appAkademik.Post("/users", userHandler.Index)
+		appAkademik.Post("/users", userHandler.UpdateSingle)
 		// appAkademik.Post("/user/sync", userHandler.Sync)
 		// appSecure.Post("/user/reset", userHandler.Reset)
 

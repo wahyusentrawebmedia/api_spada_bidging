@@ -34,6 +34,19 @@ func (s *UserService) GetUserByID(id int) (interface{}, error) {
 	return nil, nil
 }
 
+// GetUserByUsername retrieves a user by their username
+func (s *UserService) GetUserByUsername(repo *repository.UserRepository, username string) (*model.MdlUser, error) {
+	user, err := repo.GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return &model.MdlUser{}, nil
+	}
+	return user, nil
+}
+
 // SyncUser synchronizes user data from an external source
 func (s *UserService) SyncUser(c *utils.CustomContext, repo *repository.UserRepository, user *model.UserSyncRequest) (*model.UserSyncResponse, error) {
 	repoMahasiswa := repo
@@ -140,6 +153,30 @@ func (s *UserService) ResetPassword(repo *repository.UserRepository, ids []int) 
 		"updated_users": updatedUsers,
 		"new_passwords": newPasswords,
 	}, nil
+}
+
+// ChangePassword changes the password for a user
+func (s *UserService) ChangePassword(c *utils.CustomContext, repo *repository.UserRepository, username, oldPassword, newPassword string) error {
+	repoUsers := repo
+
+	repoApiMoodle := repository.NewApiModel(c.GetEndpoint())
+
+	user, err := repoUsers.GetUserByUsername(username)
+	if err != nil {
+		return err
+	}
+
+	// if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
+	// 	return errors.New("Old password is incorrect")
+	// }
+
+	hashedNewPassword := repoApiMoodle.HashingPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	user.Password = hashedNewPassword
+	return repoUsers.UpdateUser(user)
 }
 
 // generateRandomString generates a random string of given length

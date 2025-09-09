@@ -12,10 +12,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var jwtCheckURL = "/spada/sessions"
+var jwtCheckURLUser = "/admin/check_auth"
 
 // JWTCheckMiddleware memvalidasi JWT dengan memanggil endpoint eksternal
-func JWTCheckMiddleware() fiber.Handler {
+func JWTCheckMiddlewareUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		urlAkademikAuth := viper.GetString("URL_AKADEMIK_AUTH")
 		cc := utils.NewCustomContext(c)
@@ -28,7 +28,7 @@ func JWTCheckMiddleware() fiber.Handler {
 
 		// Kirim token ke endpoint eksternal untuk validasi
 		client := &http.Client{}
-		req, err := http.NewRequest("GET", urlAkademikAuth+jwtCheckURL, nil)
+		req, err := http.NewRequest("GET", urlAkademikAuth+jwtCheckURLUser, nil)
 		if err != nil {
 			return cc.ErrorResponseUnauthorized("JWT check request error")
 		}
@@ -53,7 +53,7 @@ func JWTCheckMiddleware() fiber.Handler {
 		}
 
 		defer resp.Body.Close()
-		var jwtResp model.JWTCheckResponse
+		var jwtResp model.JWTUserCheckResponse
 		if err := utils.DecodeJSON(resp.Body, &jwtResp); err != nil {
 			return cc.ErrorResponseUnauthorized("Failed to decode JWT check response")
 		}
@@ -63,9 +63,14 @@ func JWTCheckMiddleware() fiber.Handler {
 		}
 
 		c.Locals("id_perguruan_tinggi", strconv.Itoa(jwtResp.Data.IDPerguruanTinggi))
+		c.Locals("username", jwtResp.Data.Username)
 
 		if c.Locals("id_perguruan_tinggi") == "" {
 			return cc.ErrorResponseUnauthorized("id_perguruan_tinggi tidak ditemukan di token")
+		}
+
+		if c.Locals("username") == "" {
+			return cc.ErrorResponseUnauthorized("username tidak ditemukan di token")
 		}
 
 		cc.SetLocalsParameter()

@@ -33,7 +33,7 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 }
 
 // POST /user
-func (h *UserHandler) Index(c *fiber.Ctx) error {
+func (h *UserHandler) UpdateSingle(c *fiber.Ctx) error {
 	cc := utils.NewCustomContext(c)
 
 	var req model.UserSyncRequest
@@ -51,6 +51,44 @@ func (h *UserHandler) Index(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 	return cc.SuccessResponse(resp, "User synced successfully")
+}
+
+// GetDetail /user
+func (h *UserHandler) GetDetail(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	user, err := h.UserService.GetUserByUsername(repository.NewUserRepository(db), cc.GetUsername())
+
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(user, "User fetched successfully")
+}
+
+// UpdatePassword /user/password
+func (h *UserHandler) UpdatePassword(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	var req model.UserChangePasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	err = h.UserService.ChangePassword(cc, repository.NewUserRepository(db), cc.GetUsername(), req.OldPassword, req.NewPassword)
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(fiber.Map{"action": true}, "Password updated successfully")
 }
 
 // // POST /user/sync
