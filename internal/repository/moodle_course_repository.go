@@ -43,7 +43,7 @@ func (r *MoodleCourseRepository) GetByIDNumber(idnumber string) (*model.Course, 
 }
 
 func (r *MoodleCourseRepository) Update(ctx context.Context, course *model.Course) error {
-	return r.db.WithContext(ctx).Debug().Save(course).Error
+	return r.db.WithContext(ctx).Save(course).Error
 }
 
 func (r *MoodleCourseRepository) Delete(ctx context.Context, id int64) error {

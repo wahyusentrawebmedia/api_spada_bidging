@@ -48,7 +48,7 @@ func (r *groupsRepository) GetByIDNumber(idnumber string) (*model.MdlGroups, err
 // GetByCategoriesID
 func (r *groupsRepository) GetByCategoriesID(ctx context.Context, categoriesID int64) ([]*model.MdlGroups, error) {
 	var groups []*model.MdlGroups
-	if err := r.db.WithContext(ctx).Debug().Joins("JOIN mdl_course mc on mdl_groups.courseid = mc.id").
+	if err := r.db.WithContext(ctx).Joins("JOIN mdl_course mc on mdl_groups.courseid = mc.id").
 		Where("mc.category = ?", categoriesID).Find(&groups).Error; err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (r *groupsRepository) GetByID(ctx context.Context, id int64) (*model.MdlGro
 }
 
 func (r *groupsRepository) Update(ctx context.Context, group *model.MdlGroups) error {
-	tx := r.db.WithContext(ctx).Debug().Model(&model.MdlGroups{}).Where("id = ?", group.ID).Updates(group)
+	tx := r.db.WithContext(ctx).Model(&model.MdlGroups{}).Where("id = ?", group.ID).Updates(group)
 	if tx.Error != nil {
 		return tx.Error
 	}
