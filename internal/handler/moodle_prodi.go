@@ -20,7 +20,7 @@ func NewProdisHandler(service service.MoodleProdiService) *MoodleProdisHandler {
 func (h *MoodleProdisHandler) GetProdis(c *fiber.Ctx) error {
 	cc := utils.NewCustomContext(c)
 
-	id := c.Query("id")
+	id := c.Params("id")
 
 	db, err := cc.GetGormConnectionForPerguruanTinggi()
 	if err != nil {
@@ -73,13 +73,6 @@ func (h *MoodleProdisHandler) SyncProdis(c *fiber.Ctx) error {
 	}
 
 	errs := h.service.BatchProdiSync(req, db)
-	if errs != nil {
-		var errMsgs []string
-		for _, err := range errs {
-			errMsgs = append(errMsgs, err.Error())
-		}
-		return cc.ErrorResponse("Batch sync errors: " + utils.JoinStrings(errMsgs, "; "))
-	}
 
-	return cc.SuccessResponse(nil, "Prodis sync successfully")
+	return cc.SuccessResponse(errs, "Prodis sync successfully")
 }

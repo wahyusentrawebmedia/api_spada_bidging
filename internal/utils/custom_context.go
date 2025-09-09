@@ -47,6 +47,10 @@ func (cc *CustomContext) GetEndpoint() string {
 	return cc.Locals("endpoint").(string)
 }
 
+func (cc *CustomContext) GetUsername() string {
+	return cc.Locals("username").(string)
+}
+
 func (cc *CustomContext) SetLocalsParameter() error {
 	dataPerguruanTinggi, err := cc.GetDataPerguruanTinggi()
 

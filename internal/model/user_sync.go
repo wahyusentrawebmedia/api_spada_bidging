@@ -15,3 +15,8 @@ type UserSyncResponse struct {
 	Pesan    string `json:"pesan"`
 	IdSpada  int64  `json:"id_spada"`
 }
+
+type UserChangePasswordRequest struct {
+	OldPassword string `json:"old_password" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required"`
+}

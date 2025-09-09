@@ -45,10 +45,15 @@ func (r *MoodleFakultasRepository) UpdateFakultas(fakultas *model.MdlCourseCateg
 }
 
 // GetAllProdi retrieves all prodi from the database
-func (r *MoodleFakultasRepository) GetAllProdi(id string) ([]model.MdlCourseCategory, error) {
+func (r *MoodleFakultasRepository) GetAllProdi(kodeFakultas string) ([]model.MdlCourseCategory, error) {
 	var prodi []model.MdlCourseCategory
 
-	if err := r.db.Debug().Where("idnumber = ?", id).Find(&prodi).Error; err != nil {
+	var prodiFakultas model.MdlCourseCategory
+	if err := r.db.Debug().Where("idnumber = ?", kodeFakultas).First(&prodiFakultas).Error; err != nil {
+		return nil, err
+	}
+
+	if err := r.db.Debug().Where("parent = ?", prodiFakultas.ID).Find(&prodi).Error; err != nil {
 		return nil, err
 	}
 	return prodi, nil

@@ -22,23 +22,24 @@ func RegisterRoutes(app *fiber.App) {
 	semesterHandler := NewSemesterHandler(*service.NewMoodleSemesterService())
 	// moodleHandler := NewMoodleHandler(*service.NewMoodleService())
 
-	appSecure := app.Use(middleware.JWTCheckMiddleware())
+	{
+		appSecureuser := app.Group("/dosen", middleware.JWTCheckMiddlewareUser())
+
+		// User CRUD
+		appSecureuser.Get("/", userHandler.GetDetail)
+		appSecureuser.Post("/", userHandler.UpdateSingle)
+	}
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "pong"})
 	})
 
-	appAkademik := appSecure.Group("/akademik")
-
 	{
+		appAkademik := app.Group("/akademik", middleware.JWTCheckMiddleware())
+
 		// User CRUD
 		appAkademik.Get("/users", userHandler.GetAllUsers)
-		appAkademik.Post("/users", userHandler.Index)
-		// appAkademik.Post("/user/sync", userHandler.Sync)
-		// appSecure.Post("/user/reset", userHandler.Reset)
-
-		// Moodle: Update password user
-		// appAkademik.Post("/moodle/user/update-password", moodleHandler.UpdatePassword)
+		appAkademik.Post("/users", userHandler.UpdateSingle)
 
 		// Fakultas
 		fakultasRoute := appAkademik.Group("/fakultas")
@@ -48,11 +49,11 @@ func RegisterRoutes(app *fiber.App) {
 		fakultasRoute.Post("/sync", fakultasHandler.SyncFakultas)
 
 		// Prodi
-		prodiRoute := appAkademik.Group("/fakultas/:id/prodi")
+		prodiRoute := appAkademik.Group("/fakultas/:id/")
 
-		prodiRoute.Get("/", prodiHandler.GetProdis)
-		prodiRoute.Post("/", prodiHandler.CreateProdis)
-		prodiRoute.Post("/sync", prodiHandler.SyncProdis)
+		prodiRoute.Get("/prodi", prodiHandler.GetProdis)
+		prodiRoute.Post("/prodi", prodiHandler.CreateProdis)
+		prodiRoute.Post("/prodi-sync", prodiHandler.SyncProdis)
 
 		// Tahun Akademik
 		tahunAkademikRoute := appAkademik.Group("/fakultas/:id/prodi/:prodi_id/tahun")
@@ -67,12 +68,24 @@ func RegisterRoutes(app *fiber.App) {
 		semesterRoute.Get("/", semesterHandler.GetdSemester)
 		semesterRoute.Post("/", semesterHandler.CreatedSemester)
 		semesterRoute.Post("/sync", semesterHandler.SyncdSemester)
+
+		// Dosen
+		DosenRoute := appAkademik.Group("")
+
+		DosenRoute.Get("/dosen", userHandler.GetAllUsers)
+		DosenRoute.Post("/dosen-sync", userHandler.Sync)
 	}
 
-	// Postgres Config CRUD
-	appSecure.Get("/config/postgres", postgresConfigHandler.ListPostgresConfigs)
-	appSecure.Post("/config/postgres", postgresConfigHandler.CreatePostgresConfig)
-	appSecure.Get("/config/postgres/:id", postgresConfigHandler.GetPostgresConfig)
-	appSecure.Put("/config/postgres/:id", postgresConfigHandler.UpdatePostgresConfig)
-	appSecure.Delete("/config/postgres/:id", postgresConfigHandler.DeletePostgresConfig)
+	{
+
+		appSecure := app.Group("config", middleware.JWTCheckMiddlewareUser())
+
+		// Postgres Config CRUD
+		appSecure.Get("/config/postgres", postgresConfigHandler.ListPostgresConfigs)
+		appSecure.Post("/config/postgres", postgresConfigHandler.CreatePostgresConfig)
+		appSecure.Get("/config/postgres/:id", postgresConfigHandler.GetPostgresConfig)
+		appSecure.Put("/config/postgres/:id", postgresConfigHandler.UpdatePostgresConfig)
+		appSecure.Delete("/config/postgres/:id", postgresConfigHandler.DeletePostgresConfig)
+	}
+
 }
