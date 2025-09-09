@@ -4,6 +4,7 @@ import "api/spada/internal/model"
 
 type PostgresConfigRequest struct {
 	IDPerguruanTinggi int    `json:"id_perguruan_tinggi" binding:"required"`
+	Type              string `json:"type" binding:"required"` // psql, mysql
 	Name              string `json:"name" binding:"required"`
 	Host              string `json:"host" binding:"required"`
 	Port              int    `json:"port" binding:"required"`
@@ -17,6 +18,7 @@ type PostgresConfigRequest struct {
 func (req PostgresConfigRequest) ToModel() model.PostgresConfig {
 	return model.PostgresConfig{
 		IDPerguruanTinggi: req.IDPerguruanTinggi,
+		Type:              req.Type,
 		Name:              req.Name,
 		Host:              req.Host,
 		Port:              req.Port,

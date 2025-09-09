@@ -30,10 +30,10 @@ jobs:
       run: |
         cat > .env << EOF
         DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
-        DB_USER=${{ secrets.DB_USER || 'postgres' }}
-        DB_PASS=${{ secrets.DB_PASS || '' }}
-        DB_PORT=${{ secrets.DB_PORT || '5432' }}
-        DB_NAME=${{ secrets.DB_NAME || 'api_spada_akademik' }}
+        DB_USER=${{ secrets.DB_USER || 'admin' }}
+        DB_PASS=${{ secrets.DB_PASS || 'YtvAQGQx0yDX78li' }}
+        DB_PORT=${{ secrets.DB_PORT || '5433' }}
+        DB_NAME=${{ secrets.DB_NAME || 'database_akademik_user' }}
 
         URL_AKADEMIK_AUTH=${{ secrets.URL_AKADEMIK_AUTH || 'https://devakademik-pengaturan.sentrawebmedia.com' }}
         EOF
@@ -121,9 +121,9 @@ jobs:
     - name: Deploy to VPS via SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
+        host: ${{ secrets.SSH_HOST || '139.162.8.27' }}
         username: ${{ secrets.SSH_USERNAME || 'root' }}
-        password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
+        password: ${{ secrets.SSH_PASSWORD || 'ziqhi9-xoxsiw-neTqim' }}
         port: ${{ secrets.SSH_PORT || 22 }}
         script: |
           # Create deployment directory
@@ -138,9 +138,9 @@ jobs:
     - name: Copy files to VPS
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
+        host: ${{ secrets.SSH_HOST || '139.162.8.27' }}
         username: ${{ secrets.SSH_USERNAME || 'root' }}
-        password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
+        password: ${{ secrets.SSH_PASSWORD || 'ziqhi9-xoxsiw-neTqim' }}
         port: ${{ secrets.SSH_PORT || 22 }}
         source: "deploy/*"
         target: "~/akademik-deployment/"
@@ -149,9 +149,9 @@ jobs:
     - name: Execute deployment script
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.SSH_HOST || '172.237.79.206' }}
+        host: ${{ secrets.SSH_HOST || '139.162.8.27' }}
         username: ${{ secrets.SSH_USERNAME || 'root' }}
-        password: ${{ secrets.SSH_PASSWORD || 'cIfqap-comri7-memvuh' }}
+        password: ${{ secrets.SSH_PASSWORD || 'ziqhi9-xoxsiw-neTqim' }}
         port: ${{ secrets.SSH_PORT || 22 }}
         script: |
           cd ~/akademik-deployment

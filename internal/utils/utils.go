@@ -11,3 +11,20 @@ func DecodeJSON(body io.ReadCloser, out interface{}) error {
 	decoder := json.NewDecoder(body)
 	return decoder.Decode(out)
 }
+
+// JoinStrings	 joins a slice of strings with a given separator
+func JoinStrings(elements []string, sep string) string {
+	result := ""
+	for i, elem := range elements {
+		if i > 0 {
+			result += sep
+		}
+		result += elem
+	}
+	return result
+}
+
+// PtrString returns a pointer to the given string
+func PtrString(s string) *string {
+	return &s
+}
