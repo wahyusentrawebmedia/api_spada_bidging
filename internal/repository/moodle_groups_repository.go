@@ -4,6 +4,7 @@ import (
 	"api/spada/internal/model"
 	"context"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -16,6 +17,7 @@ type GroupsRepository interface {
 	List(ctx context.Context) ([]*model.MdlGroups, error)
 	GetByIDNumber(idnumber string) (*model.MdlGroups, error)
 	GetByCategoriesID(ctx context.Context, categoriesID int64) ([]*model.MdlGroups, error)
+	GetByCategoriesIDNumber(ctx context.Context, idNumber string) ([]*model.MdlGroups, error)
 }
 
 type groupsRepository struct {
@@ -48,8 +50,19 @@ func (r *groupsRepository) GetByIDNumber(idnumber string) (*model.MdlGroups, err
 // GetByCategoriesID
 func (r *groupsRepository) GetByCategoriesID(ctx context.Context, categoriesID int64) ([]*model.MdlGroups, error) {
 	var groups []*model.MdlGroups
-	if err := r.db.WithContext(ctx).Joins("JOIN mdl_course mc on mdl_groups.courseid = mc.id").
-		Where("mc.category = ?", categoriesID).Find(&groups).Error; err != nil {
+	if err := r.db.WithContext(ctx).Debug().Joins("JOIN mdl_course mc on mdl_groups.courseid = mc.id").
+		Where("mc.category LIKE ?", "%"+fmt.Sprint(categoriesID)+"%").Find(&groups).Error; err != nil {
+		return nil, err
+	}
+	return groups, nil
+}
+
+func (r *groupsRepository) GetByCategoriesIDNumber(ctx context.Context, idNumber string) ([]*model.MdlGroups, error) {
+	var groups []*model.MdlGroups
+	if err := r.db.WithContext(ctx).Debug().
+		Joins("JOIN mdl_course mc on mdl_groups.courseid = mc.id").
+		Joins("JOIN mdl_course_categories mcc on mc.category = mcc.id").
+		Where("mcc.idnumber LIKE ?", "%"+fmt.Sprint(idNumber)+"%").Find(&groups).Error; err != nil {
 		return nil, err
 	}
 	return groups, nil

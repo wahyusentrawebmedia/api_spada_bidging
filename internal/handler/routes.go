@@ -93,7 +93,6 @@ func RegisterRoutes(app *fiber.App) {
 
 		// Groups
 		groupsRoute := appAkademik.Group("/groups")
-
 		groupsRoute.Get("/categories/:categories_id", groupHandler.GetGroupsByCategoriesID)
 
 		// Dosen

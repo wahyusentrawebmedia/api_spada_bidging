@@ -18,15 +18,8 @@ func NewMoodleGroupsService() *MoodleGroupsService {
 // GetGroupsByCategoriesID
 func (s *MoodleGroupsService) GetGroupsByCategoriesID(idNumber string, db *gorm.DB) ([]*model.MdlGroups, error) {
 	repo := repository.NewGroupsRepository(db)
-	var repoCategories = repository.NewMoodleFakultasRepository(db)
 
-	// Cek apakah Categories dengan IDNumber yang sama sudah ada
-	existingCategories, err := repoCategories.GetFakultasByIDNumber(idNumber)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
-
-	groups, err := repo.GetByCategoriesID(context.Background(), existingCategories.ID)
+	groups, err := repo.GetByCategoriesIDNumber(context.Background(), idNumber)
 	if err != nil {
 		return nil, err
 	}
