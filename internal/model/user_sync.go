@@ -1,5 +1,10 @@
 package model
 
+type DosenMahasiwaSyncRequest struct {
+	Mahasiswa []UserSyncRequest `json:"mahasiswa" validate:"dive"`
+	Dosen     []UserSyncRequest `json:"dosen" validate:"dive"`
+}
+
 type UserSyncRequest struct {
 	Username  string `json:"username" validate:"required"`
 	Password  string `json:"password" validate:"required"`

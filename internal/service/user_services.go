@@ -64,6 +64,74 @@ func (s *UserService) GetUserByUsername(repo *repository.UserRepository, usernam
 	return user, nil
 }
 
+// SyncUserBatchDosenMahasiswaMakul synchronizes a batch of dosen and mahasiswa users for a specific makul
+func (s *UserService) SyncUserBatchDosenMahasiswaMakul(c *utils.CustomContext, repo *repository.UserRepository, users model.DosenMahasiwaSyncRequest, kodeMakul string) ([]model.UserSyncResponse, error) {
+	var results []model.UserSyncResponse
+
+	for _, user := range users.Mahasiswa {
+		resp, err := s.SyncUser(c, repo, &user)
+		if err != nil {
+			results = append(results, model.UserSyncResponse{
+				Action:   false,
+				Username: user.Username,
+				Password: user.Password,
+				Pesan:    "Sinkronisasi Gagal: " + err.Error(),
+			})
+		} else {
+			results = append(results, *resp)
+		}
+	}
+
+	for _, user := range users.Dosen {
+		resp, err := s.SyncUser(c, repo, &user)
+		if err != nil {
+			results = append(results, model.UserSyncResponse{
+				Action:   false,
+				Username: user.Username,
+				Password: user.Password,
+				Pesan:    "Sinkronisasi Gagal: " + err.Error(),
+			})
+		} else {
+			results = append(results, *resp)
+		}
+	}
+	return results, nil
+}
+
+// SyncUserBatchDosenMahasiswa synchronizes a batch of dosen and mahasiswa users
+func (s *UserService) SyncUserBatchDosenMahasiswa(c *utils.CustomContext, repo *repository.UserRepository, users model.DosenMahasiwaSyncRequest) ([]model.UserSyncResponse, error) {
+	var results []model.UserSyncResponse
+
+	for _, user := range users.Mahasiswa {
+		resp, err := s.SyncUser(c, repo, &user)
+		if err != nil {
+			results = append(results, model.UserSyncResponse{
+				Action:   false,
+				Username: user.Username,
+				Password: user.Password,
+				Pesan:    "Sinkronisasi Gagal: " + err.Error(),
+			})
+		} else {
+			results = append(results, *resp)
+		}
+	}
+
+	for _, user := range users.Dosen {
+		resp, err := s.SyncUser(c, repo, &user)
+		if err != nil {
+			results = append(results, model.UserSyncResponse{
+				Action:   false,
+				Username: user.Username,
+				Password: user.Password,
+				Pesan:    "Sinkronisasi Gagal: " + err.Error(),
+			})
+		} else {
+			results = append(results, *resp)
+		}
+	}
+	return results, nil
+}
+
 // SyncUserBatch synchronizes a batch of users
 func (s *UserService) SyncUserBatch(c *utils.CustomContext, repo *repository.UserRepository, users []model.UserSyncRequest) ([]model.UserSyncResponse, error) {
 	var results []model.UserSyncResponse
