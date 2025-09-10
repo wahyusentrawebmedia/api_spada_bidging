@@ -25,7 +25,11 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	if err != nil {
 		return cc.ErrorResponse(err.Error())
 	}
-	users, err := h.UserService.FetchAllUsersWithPagination(repository.NewUserRepository(db), 1, 100)
+
+	users, err := h.UserService.FetchAllUsersWithPagination(
+		c.Query("id_number_group"),
+		db, 1, 100,
+	)
 	if err != nil {
 		return cc.ErrorResponse(err.Error())
 	}
