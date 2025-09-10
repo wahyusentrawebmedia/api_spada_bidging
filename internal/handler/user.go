@@ -161,7 +161,35 @@ func (h *UserHandler) SyncDosenMahasiswaMakul(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, kodeMakul)
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, service.DosenMahasiwaSyncRequest{
+		KodeMakul: kodeMakul,
+	})
+
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(resp, "Users synced successfully")
+}
+
+// POST /user/sync/dosen-mahasiswa
+func (h *UserHandler) SyncDosenMahasiswaCategories(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	kodeCategories := c.Params("kode_categories")
+
+	var req model.DosenMahasiwaSyncRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, service.DosenMahasiwaSyncRequest{
+		KodeCategories: kodeCategories,
+	})
 
 	if err != nil {
 		return cc.ErrorResponse(err.Error())
