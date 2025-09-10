@@ -15,9 +15,10 @@ type UserRepository struct {
 }
 
 type ParameterUser struct {
-	IDGrup   int
-	TypeUser string
-	IdMakul  string
+	IDGrup             int
+	TypeUser           string
+	IdMakul            string
+	IdNumberCategories string
 }
 
 func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, error) {
@@ -61,6 +62,17 @@ func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, 
 			Joins("JOIN mdl_enrol e ON ue.enrolid = e.id").
 			Joins("JOIN mdl_course c ON e.courseid = c.id").
 			Where("c.idnumber = ?", parameter.IdMakul).
+			Select("mdl_user.id")
+
+		query = query.Where("mdl_user.id IN (?)", subQuery)
+	}
+
+	if parameter.IdNumberCategories != "" {
+		subQuery := r.db.Model(&model.MdlUser{}).
+			Joins("JOIN mdl_cohort_members ue ON ue.userid = mdl_user.id").
+			Joins("JOIN mdl_cohort c ON ue.cohortid = c.id").
+			Joins("JOIN mdl_course_categories cc ON c.idnumber = cc.idnumber").
+			Where("cc.idnumber = ?", parameter.IdNumberCategories).
 			Select("mdl_user.id")
 
 		query = query.Where("mdl_user.id IN (?)", subQuery)

@@ -20,11 +20,12 @@ func NewUserService() *UserService {
 }
 
 type ParameterUser struct {
-	IdNumberGroup string
-	IdMakul       string
-	TypeUser      string // dosen atau mahasiswa
-	Page          int
-	Limit         int
+	IdNumberGroup      string
+	IdMakul            string
+	IdNumberCategories string
+	TypeUser           string // dosen atau mahasiswa
+	Page               int
+	Limit              int
 }
 
 // FetchAllUsersWithPagination retrieves all users with pagination
@@ -52,6 +53,7 @@ func (s *UserService) FetchAllUsersWithPagination(
 	}
 
 	parameter.IdMakul = param.IdMakul
+	parameter.IdNumberCategories = param.IdNumberCategories
 
 	users, err := repo.GetAllUsers(parameter)
 	if err != nil {
@@ -455,12 +457,82 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 	repoMahasiswa := repository.NewUserRepository(db)
 	repoApiMoodle := repository.NewApiModel(c.GetEndpoint())
 	repoCourse := repository.NewMoodleCourseRepository(db)
+	repoProdi := repository.NewMoodleFakultasRepository(db)
+	repoCohort := repository.NewMoodleCohortRepository(db)
+	repoCohortMember := repository.NewMoodleCohortMemberRepository(db)
 
 	// check username ada tidak di user existing
 	userExists, err := repoMahasiswa.GetUserByUsername(user.Username)
 
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("Tidak bisa mendapatkan user untuk user " + user.Username)
+	}
+
+	syncMakul := func(user model.MdlUser) error {
+		if params.KodeMakul != "" {
+			course, err := repoCourse.GetByIDNumber(params.KodeMakul)
+			if err != nil {
+				return errors.New("Tidak bisa mendapatkan course untuk kode makul " + params.KodeMakul)
+			}
+			if course == nil {
+				return errors.New("Course tidak ditemukan untuk kode makul " + params.KodeMakul)
+			}
+			err = s.RegisterUserToCourse(c, db, int64(user.ID), int64(course.ID), userType)
+			if err != nil {
+				return errors.New("Tidak bisa mendaftarkan user ke course untuk kode makul " + params.KodeMakul + " error: " + err.Error())
+			}
+		}
+
+		return nil
+	}
+
+	syncCategories := func(user model.MdlUser) error {
+		if params.KodeCategories != "" {
+			categories, err := repoProdi.GetFakultasByIDNumber(params.KodeCategories)
+			if err != nil {
+				return errors.New("Tidak bisa mendapatkan categories untuk kode categories " + params.KodeCategories)
+			}
+
+			cohort, err := repoCohort.GetCohortByIDNumber(*categories.IDNumber)
+
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return errors.New("Tidak bisa mendapatkan cohort untuk user " + userType)
+			}
+			if cohort == nil {
+				newCohort := model.Cohort{
+					Name:         categories.Name,
+					IDNumber:     utils.StringPtr(params.KodeCategories),
+					Description:  utils.StringPtr("Cohort for " + params.KodeCategories),
+					ContextID:    categories.ID,
+					TimeCreated:  time.Now().Unix(),
+					TimeModified: time.Now().Unix(),
+				}
+				err := repoCohort.Create(c.Context(), &newCohort)
+				if err != nil {
+					return errors.New("Tidak bisa membuat cohort untuk user " + userType)
+				}
+				cohort = &newCohort
+			}
+
+			// Tambahkan user ke cohort member jika belum ada
+			cohortMember, err := repoCohortMember.GetByCohortIDAndUserId(c.Context(), cohort.ID, int64(user.ID))
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return errors.New("Tidak bisa mendapatkan cohort member untuk user " + userType)
+			}
+			if cohortMember == nil {
+				newCohortMember := model.CohortMember{
+					CohortID:  cohort.ID,
+					UserID:    int64(user.ID),
+					TimeAdded: time.Now().Unix(),
+				}
+				err := repoCohortMember.Create(c.Context(), &newCohortMember)
+				if err != nil {
+					return errors.New("Tidak bisa menambahkan user ke cohort " + userType)
+				}
+			}
+
+		}
+		return nil
 	}
 
 	if userExists != nil {
@@ -486,6 +558,14 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 			if err != nil {
 				return nil, errors.New("Tidak bisa mendaftarkan user ke course untuk kode makul " + params.KodeMakul + " error: " + err.Error())
 			}
+		}
+
+		if err := syncMakul(*userExists); err != nil {
+			return nil, err
+		}
+
+		if err := syncCategories(*userExists); err != nil {
+			return nil, err
 		}
 
 		if err != nil {
@@ -527,18 +607,12 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 		s.RegisterToCohort(c, db, int64(simpan.ID), userType)
 		s.AddRoleAssignment(c, db, int64(simpan.ID), userType)
 
-		if params.KodeMakul != "" {
-			course, err := repoCourse.GetByIDNumber(params.KodeMakul)
-			if err != nil {
-				return nil, errors.New("Tidak bisa mendapatkan course untuk kode makul " + params.KodeMakul)
-			}
-			if course == nil {
-				return nil, errors.New("Course tidak ditemukan untuk kode makul " + params.KodeMakul)
-			}
-			err = s.RegisterUserToCourse(c, db, int64(simpan.ID), int64(course.ID), userType)
-			if err != nil {
-				return nil, errors.New("Tidak bisa mendaftarkan user ke course untuk kode makul " + params.KodeMakul + " error: " + err.Error())
-			}
+		if err := syncMakul(simpan); err != nil {
+			return nil, err
+		}
+
+		if err := syncCategories(*userExists); err != nil {
+			return nil, err
 		}
 
 		if err != nil {

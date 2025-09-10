@@ -27,11 +27,12 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	}
 
 	parameter := service.ParameterUser{
-		IdNumberGroup: c.Query("id_number_group"),
-		TypeUser:      c.Query("type_user"),
-		IdMakul:       c.Query("kode_makul"),
-		Page:          1,
-		Limit:         100,
+		IdNumberGroup:      c.Query("id_number_group"),
+		TypeUser:           c.Query("type_user"),
+		IdMakul:            c.Query("kode_makul"),
+		IdNumberCategories: c.Query("kode_categories"),
+		Page:               1,
+		Limit:              100,
 	}
 
 	users, err := h.UserService.FetchAllUsersWithPagination(
