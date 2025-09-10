@@ -6,3 +6,8 @@ type DefaultResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 	Errors  []string    `json:"errors,omitempty"`
 }
+
+type UserChangeEmailRequest struct {
+	Username string `json:"username" validate:"required"`
+	NewEmail string `json:"new-email" validate:"required,email"`
+}

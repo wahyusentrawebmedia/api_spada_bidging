@@ -3,6 +3,7 @@ package handler
 import (
 	"api/spada/internal/model"
 	"api/spada/internal/repository"
+	"api/spada/internal/response"
 	"api/spada/internal/service"
 	"api/spada/internal/utils"
 
@@ -27,11 +28,12 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	}
 
 	parameter := service.ParameterUser{
-		IdNumberGroup: c.Query("id_number_group"),
-		TypeUser:      c.Query("type_user"),
-		IdMakul:       c.Query("kode_makul"),
-		Page:          1,
-		Limit:         100,
+		IdNumberGroup:      c.Query("id_number_group"),
+		TypeUser:           c.Query("type_user"),
+		IdMakul:            c.Query("kode_makul"),
+		IdNumberCategories: c.Query("kode_categories"),
+		Page:               1,
+		Limit:              100,
 	}
 
 	users, err := h.UserService.FetchAllUsersWithPagination(
@@ -63,6 +65,27 @@ func (h *UserHandler) UpdateSingle(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 	return cc.SuccessResponse(resp, "User synced successfully")
+}
+
+// Post /user/change-email
+func (h *UserHandler) ChangeEmail(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	var req response.UserChangeEmailRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	err = h.UserService.ChangeEmail(cc, db, req.Username, req.NewEmail)
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(fiber.Map{"action": true}, "Email updated successfully")
 }
 
 // GetDetail /user
@@ -161,7 +184,35 @@ func (h *UserHandler) SyncDosenMahasiswaMakul(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, kodeMakul)
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, service.DosenMahasiwaSyncRequest{
+		KodeMakul: kodeMakul,
+	})
+
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(resp, "Users synced successfully")
+}
+
+// POST /user/sync/dosen-mahasiswa
+func (h *UserHandler) SyncDosenMahasiswaCategories(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	kodeCategories := c.Params("kode_categories")
+
+	var req model.DosenMahasiwaSyncRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, service.DosenMahasiwaSyncRequest{
+		KodeCategories: kodeCategories,
+	})
 
 	if err != nil {
 		return cc.ErrorResponse(err.Error())

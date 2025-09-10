@@ -86,7 +86,7 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 
 	// create context if not exists
 	context, err := repoContext.GetByInstanceIDAndLevel(nil, int(repoCourseData.ID), 50)
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("error mencari context course dengan instanceid " + fmt.Sprintf("%d", repoCourseData.ID) + ": " + err.Error())
 	}
 	if context == nil || context.ID == 0 {
