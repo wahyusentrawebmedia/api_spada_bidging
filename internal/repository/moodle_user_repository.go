@@ -26,9 +26,12 @@ func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, 
 	query := r.db.Debug().Model(&model.MdlUser{})
 
 	if parameter.IDGrup != 0 {
-		query = query.
+		subQuery := r.db.Model(&model.MdlUser{}).
 			Joins("JOIN mdl_groups_members gm ON gm.userid = mdl_user.id").
 			Where("gm.groupid = ?", parameter.IDGrup)
+
+		query = query.Where("mdl_user.id IN (?)", subQuery)
+
 	}
 
 	if parameter.TypeUser != "" {
