@@ -15,7 +15,9 @@ type UserRepository struct {
 }
 
 type ParameterUser struct {
-	IDGrup int
+	IDGrup   int
+	TypeUser string
+	IdMakul  string
 }
 
 func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, error) {
@@ -27,6 +29,27 @@ func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, 
 		query = query.
 			Joins("JOIN mdl_groups_members gm ON gm.userid = mdl_user.id").
 			Where("gm.groupid = ?", parameter.IDGrup)
+	}
+
+	if parameter.TypeUser != "" {
+		switch parameter.TypeUser {
+		case "dosen":
+			query = query.Joins("JOIN mdl_role_assignments ra ON mdl_user.id = ra.userid").
+				Joins("JOIN mdl_role r ON ra.roleid = r.id").
+				Where("r.shortname = ?", "editingteacher")
+		case "mahasiswa":
+			query = query.Joins("JOIN mdl_role_assignments ra ON mdl_user.id = ra.userid").
+				Joins("JOIN mdl_role r ON ra.roleid = r.id").
+				Where("r.shortname = ?", "student")
+		}
+	}
+
+	if parameter.IdMakul != "" {
+		query = query.
+			Joins("JOIN mdl_user_enrolments ue ON ue.userid = mdl_user.id").
+			Joins("JOIN mdl_enrol e ON ue.enrolid = e.id").
+			Joins("JOIN mdl_course c ON e.courseid = c.id").
+			Where("c.idnumber = ?", parameter.IdMakul)
 	}
 
 	if err := query.Find(&users).Error; err != nil {

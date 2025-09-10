@@ -33,9 +33,10 @@ func (s *MoodleMakulService) SyncMakulAll(reqs []response.MoodleMakulRequest, pa
 
 // SyncMakul syncs a course (makul) in Moodle based on the provided request data.
 func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent string, db *gorm.DB) error {
-	repoCategories := repository.NewMoodleFakultasRepository(db)
-	repoCourse := repository.NewMoodleCourseRepository(db)
-	repoGroups := repository.NewGroupsRepository(db)
+	repoCategories := repository.NewMoodleFakultasRepository(db) // sesuai semester
+	repoCourse := repository.NewMoodleCourseRepository(db)       // untuk mata kuliah
+	repoGroups := repository.NewGroupsRepository(db)             // untuk kelas
+	repoContext := repository.NewMoodleContextRepository(db)
 
 	idnumber := req.KodeMK + "_" + req.Tahun + "_" + req.Semester + "_" + req.Kelas
 
@@ -81,6 +82,21 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 		}
 
 		repoCourseData = newCourse
+	}
+
+	// create context if not exists
+	context, err := repoContext.GetByInstanceIDAndLevel(nil, int(repoCourseData.ID), 50)
+	if err != nil {
+		return errors.New("error mencari context course dengan instanceid " + fmt.Sprintf("%d", repoCourseData.ID) + ": " + err.Error())
+	}
+	if context == nil || context.ID == 0 {
+		newContext := &model.MdlContext{
+			ContextLevel: 50, // CONTEXT_COURSE
+			InstanceID:   repoCourseData.ID,
+		}
+		if err := repoContext.Create(nil, newContext); err != nil {
+			return errors.New("error membuat context course dengan instanceid " + fmt.Sprintf("%d", repoCourseData.ID) + ": " + err.Error())
+		}
 	}
 
 	// create or update groups
