@@ -42,6 +42,8 @@ func RegisterRoutes(app *fiber.App) {
 		// User CRUD
 		appAkademik.Get("/users", userHandler.GetAllUsers)
 		appAkademik.Post("/users", userHandler.UpdateSingle)
+		appAkademik.Post("/users/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswa)
+		appAkademik.Post("/users-makul/:id_makul/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswaMakul)
 
 		// Fakultas
 		fakultasRoute := appAkademik.Group("/fakultas")
@@ -86,10 +88,11 @@ func RegisterRoutes(app *fiber.App) {
 		categoryRoute.Get("/", categoriHandler.GetCategories)
 		categoryRoute.Post("/", categoriHandler.CreateCategories)
 		categoryRoute.Post("/sync", categoriHandler.SyncCategories)
-
-		// Makul per Semester
-		makulCategoriesRoute := categoryRoute.Group("/:semester_id/makul")
-		makulCategoriesRoute.Post("/sync", makulHandler.SyncMakul)
+		{
+			// Makul per Semester
+			makulCategoriesRoute := categoryRoute.Group("/:semester_id/makul")
+			makulCategoriesRoute.Post("/sync", makulHandler.SyncMakul)
+		}
 
 		// Groups
 		groupsRoute := appAkademik.Group("/groups")

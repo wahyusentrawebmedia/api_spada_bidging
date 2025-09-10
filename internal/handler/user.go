@@ -116,6 +116,51 @@ func (h *UserHandler) Sync(c *fiber.Ctx) error {
 	return cc.SuccessResponse(resp, "Users synced successfully")
 }
 
+// POST /user/sync/dosen-mahasiswa
+func (h *UserHandler) SyncDosenMahasiswa(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	var req model.DosenMahasiwaSyncRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswa(cc, db, req)
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(resp, "Users synced successfully")
+}
+
+// POST /user/sync/dosen-mahasiswa
+func (h *UserHandler) SyncDosenMahasiswaMakul(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	kodeMakul := c.Params("id_makul")
+
+	var req model.DosenMahasiwaSyncRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, kodeMakul)
+
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(resp, "Users synced successfully")
+}
+
 // // POST /user/reset
 // func (h *UserHandler) Reset(c *fiber.Ctx) error {
 // 	var ids []int

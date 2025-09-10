@@ -55,3 +55,12 @@ func (r *MoodleContextRepository) List(ctx context.Context) ([]*model.MdlContext
 	}
 	return contexts, nil
 }
+
+// GetByInstanceIDAndLevel
+func (r *MoodleContextRepository) GetByInstanceIDAndLevel(ctx context.Context, level int) (*model.MdlContext, error) {
+	var mdl model.MdlContext
+	if err := r.db.WithContext(ctx).Where("contextlevel = ?", level).First(&mdl).Error; err != nil {
+		return nil, err
+	}
+	return &mdl, nil
+}
