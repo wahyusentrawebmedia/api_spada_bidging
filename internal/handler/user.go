@@ -130,7 +130,7 @@ func (h *UserHandler) SyncDosenMahasiswa(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	resp, err := h.UserService.SyncUserBatchDosenMahasiswa(cc, repository.NewUserRepository(db), req)
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswa(cc, db, req)
 	if err != nil {
 		return cc.ErrorResponse(err.Error())
 	}
@@ -153,7 +153,7 @@ func (h *UserHandler) SyncDosenMahasiswaMakul(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, repository.NewUserRepository(db), req, kodeMakul)
+	resp, err := h.UserService.SyncUserBatchDosenMahasiswaMakul(cc, db, req, kodeMakul)
 
 	if err != nil {
 		return cc.ErrorResponse(err.Error())
