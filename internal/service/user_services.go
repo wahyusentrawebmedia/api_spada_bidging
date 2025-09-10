@@ -20,8 +20,25 @@ func NewUserService() *UserService {
 }
 
 // FetchAllUsersWithPagination retrieves all users with pagination
-func (s *UserService) FetchAllUsersWithPagination(repo *repository.UserRepository, page, limit int) ([]model.MdlUser, error) {
-	users, err := repo.GetAllUsers()
+func (s *UserService) FetchAllUsersWithPagination(
+	idNumberGroup string,
+	db *gorm.DB,
+	page,
+	limit int,
+) ([]model.MdlUser, error) {
+	parameter := repository.ParameterUser{}
+	repo := repository.NewUserRepository(db)
+
+	if idNumberGroup != "" {
+		repoGroups := repository.NewGroupsRepository(db)
+		groups, err := repoGroups.GetByIDNumber(idNumberGroup)
+		if err != nil {
+			return nil, err
+		}
+		parameter.IDGrup = int(groups.ID)
+	}
+
+	users, err := repo.GetAllUsers(parameter)
 	if err != nil {
 		return nil, err
 	}
@@ -214,3 +231,24 @@ func HashPassword(password string) (string, error) {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hashed), err
 }
+
+// // GetUserByGroupMembershipID retrieves a user by their group membership ID
+// func (s *UserService) GetUserByGroupMembershipID(groupMemberID int64) (*model.MdlUser, error) {
+// 	groupMember, err := repoGroupMember.GetByID(context.Background(), groupMemberID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if groupMember == nil {
+// 		return nil, errors.New("Group member not found")
+// 	}
+
+// 	user, err := repoUser.GetUserBgyID(int(groupMember.UserID))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if user == nil {
+// 		return nil, errors.New("User not found")
+// 	}
+
+// 	return user, nil
+// }

@@ -14,9 +14,22 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func (r *UserRepository) GetAllUsers() ([]model.MdlUser, error) {
+type ParameterUser struct {
+	IDGrup int
+}
+
+func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, error) {
 	var users []model.MdlUser
-	if err := r.db.Find(&users).Error; err != nil {
+
+	query := r.db.Model(&model.MdlUser{})
+
+	if parameter.IDGrup != 0 {
+		query = query.
+			Joins("JOIN mdl_groups_members gm ON gm.userid = mdl_user.id").
+			Where("gm.groupid = ?", parameter.IDGrup)
+	}
+
+	if err := query.Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
