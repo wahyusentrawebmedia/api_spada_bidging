@@ -3,6 +3,7 @@ package repository
 import (
 	"api/spada/internal/model"
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -13,6 +14,7 @@ type RoleAssignmentRepository interface {
 	Update(ctx context.Context, ra *model.RoleAssignment) error
 	Delete(ctx context.Context, id uint) error
 	List(ctx context.Context) ([]model.RoleAssignment, error)
+	GetByUserIDAndContextID(ctx context.Context, userID int64, contextID int64) (*model.RoleAssignment, error)
 }
 
 type roleAssignmentRepository struct {
@@ -49,4 +51,16 @@ func (r *roleAssignmentRepository) List(ctx context.Context) ([]model.RoleAssign
 		return nil, err
 	}
 	return ras, nil
+}
+
+// GetByUserIDAndContextID retrieves a role assignment by user ID and context ID
+func (r *roleAssignmentRepository) GetByUserIDAndContextID(ctx context.Context, userID int64, contextID int64) (*model.RoleAssignment, error) {
+	var ra model.RoleAssignment
+	if err := r.db.WithContext(ctx).Where("userid = ? AND contextid = ?", userID, contextID).First(&ra).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &ra, nil
 }

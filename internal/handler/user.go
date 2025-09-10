@@ -29,6 +29,7 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	parameter := service.ParameterUser{
 		IdNumberGroup: c.Query("id_number_group"),
 		TypeUser:      c.Query("type_user"),
+		IdMakul:       c.Query("kode_makul"),
 		Page:          1,
 		Limit:         100,
 	}

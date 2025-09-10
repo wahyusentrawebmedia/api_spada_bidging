@@ -77,12 +77,9 @@ func (r *groupsRepository) GetByID(ctx context.Context, id int64) (*model.MdlGro
 }
 
 func (r *groupsRepository) Update(ctx context.Context, group *model.MdlGroups) error {
-	tx := r.db.WithContext(ctx).Model(&model.MdlGroups{}).Where("id = ?", group.ID).Updates(group)
+	tx := r.db.WithContext(ctx).Debug().Model(&model.MdlGroups{}).Where("id = ?", group.ID).Updates(group)
 	if tx.Error != nil {
 		return tx.Error
-	}
-	if tx.RowsAffected == 0 {
-		return errors.New("no rows updated")
 	}
 	return nil
 }
