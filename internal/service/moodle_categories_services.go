@@ -19,6 +19,7 @@ func NewMoodleCategoriesService() *MoodleCategoriesService {
 func (s *MoodleCategoriesService) AddCategories(req response.MoodleCategoriesRequest, db *gorm.DB) (*model.MdlCourseCategory, error) {
 	var repoCategories = repository.NewMoodleFakultasRepository(db)
 	var repoContext = repository.NewMoodleContextRepository(db)
+	var repoCohort = repository.NewMoodleCohortRepository(db)
 
 	// Cek apakah Categories dengan IDNumber yang sama sudah ada
 	existingCategories, err := repoCategories.GetFakultasByIDNumber(req.IDNumber)
@@ -72,6 +73,22 @@ func (s *MoodleCategoriesService) AddCategories(req response.MoodleCategoriesReq
 		}
 
 		if err := repoContext.Create(nil, &context); err != nil {
+			return nil, err
+		}
+	}
+
+	// Cek apakah cohort dengan IDNumber yang sama sudah ada, jika tidak ada maka buatkan
+	existingCohort, err := repoCohort.GetCohortByIDNumber(req.IDNumber)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	if existingCohort == nil || existingCohort.ID == 0 {
+		cohort := model.Cohort{
+			Name:     req.Name,
+			IDNumber: &req.IDNumber,
+			// Tambahkan field lain jika diperlukan
+		}
+		if err := repoCohort.Create(nil, &cohort); err != nil {
 			return nil, err
 		}
 	}

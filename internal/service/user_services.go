@@ -84,7 +84,7 @@ func (s *UserService) SyncUserBatchDosenMahasiswaMakul(c *utils.CustomContext, d
 	var results []model.UserSyncResponse
 
 	for _, user := range users.Mahasiswa {
-		resp, err := s.SyncUserDosen(c, db, &user, "mahasiswa", kodeMakul)
+		resp, err := s.SyncUserDosenMahasiswa(c, db, &user, "mahasiswa", kodeMakul)
 		if err != nil {
 			results = append(results, model.UserSyncResponse{
 				Action:   false,
@@ -98,7 +98,7 @@ func (s *UserService) SyncUserBatchDosenMahasiswaMakul(c *utils.CustomContext, d
 	}
 
 	for _, user := range users.Dosen {
-		resp, err := s.SyncUserDosen(c, db, &user, "dosen", kodeMakul)
+		resp, err := s.SyncUserDosenMahasiswa(c, db, &user, "dosen", kodeMakul)
 		if err != nil {
 			results = append(results, model.UserSyncResponse{
 				Action:   false,
@@ -118,7 +118,7 @@ func (s *UserService) SyncUserBatchDosenMahasiswa(c *utils.CustomContext, db *go
 	var results []model.UserSyncResponse
 
 	for _, user := range users.Mahasiswa {
-		resp, err := s.SyncUserDosen(c, db, &user, "mahasiswa", "")
+		resp, err := s.SyncUserDosenMahasiswa(c, db, &user, "mahasiswa", "")
 		if err != nil {
 			results = append(results, model.UserSyncResponse{
 				Action:   false,
@@ -132,7 +132,7 @@ func (s *UserService) SyncUserBatchDosenMahasiswa(c *utils.CustomContext, db *go
 	}
 
 	for _, user := range users.Dosen {
-		resp, err := s.SyncUserDosen(c, db, &user, "dosen", "")
+		resp, err := s.SyncUserDosenMahasiswa(c, db, &user, "dosen", "")
 		if err != nil {
 			results = append(results, model.UserSyncResponse{
 				Action:   false,
@@ -442,46 +442,14 @@ func (s *UserService) RegisterUserToCourse(c *utils.CustomContext, db *gorm.DB, 
 	return nil
 }
 
-func (s *UserService) SyncUserDosen(c *utils.CustomContext, db *gorm.DB, user *model.UserSyncRequest, userType string, kodeMakul string) (*model.UserSyncResponse, error) {
+func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB, user *model.UserSyncRequest, userType string, kodeMakul string) (*model.UserSyncResponse, error) {
 	if userType != "dosen" && userType != "mahasiswa" {
 		return nil, errors.New("Tipe user tidak valid: " + userType)
 	}
 
 	repoMahasiswa := repository.NewUserRepository(db)
 	repoApiMoodle := repository.NewApiModel(c.GetEndpoint())
-	repoCohort := repository.NewMoodleCohortRepository(db)
 	repoCourse := repository.NewMoodleCourseRepository(db)
-
-	// check context ada tidak untuk system kalau tidak ada buatkan
-	contextSystem, err := s.ContextSystem(c, db, userType)
-
-	if err != nil {
-		return nil, err
-	}
-
-	// check cohort ada tidak untuk dosen kalau tidak ada buatkan
-	if userType == "dosen" {
-		cohort, err := repoCohort.GetCohortByIDNumber("dosen")
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("Tidak bisa mendapatkan cohort untuk user " + userType)
-		}
-
-		if cohort == nil {
-			newCohort := model.Cohort{
-				Name:         "Dosen",
-				IDNumber:     utils.StringPtr("dosen"),
-				Description:  utils.StringPtr("Cohort for Dosen"),
-				ContextID:    contextSystem.ID,
-				TimeCreated:  time.Now().Unix(),
-				TimeModified: time.Now().Unix(),
-			}
-			err := repoCohort.Create(c.Context(), &newCohort)
-			if err != nil {
-				return nil, errors.New("Tidak bisa membuat cohort untuk user " + user.Username)
-			}
-			cohort = &newCohort
-		}
-	}
 
 	// check username ada tidak di user existing
 	userExists, err := repoMahasiswa.GetUserByUsername(user.Username)
@@ -491,7 +459,6 @@ func (s *UserService) SyncUserDosen(c *utils.CustomContext, db *gorm.DB, user *m
 	}
 
 	if userExists != nil {
-		userExists.Password = user.Password
 		userExists.FirstName = user.FirstName
 		userExists.LastName = user.LastName
 		userExists.Email = user.Email
@@ -604,8 +571,6 @@ func (s *UserService) SyncUser(c *utils.CustomContext, repo *repository.UserRepo
 	}
 
 	if userExists != nil {
-
-		userExists.Password = user.Password
 		userExists.FirstName = user.FirstName
 		userExists.LastName = user.LastName
 		userExists.Email = user.Email

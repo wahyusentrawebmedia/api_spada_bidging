@@ -23,7 +23,7 @@ type ParameterUser struct {
 func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, error) {
 	var users []model.MdlUser
 
-	query := r.db.Model(&model.MdlUser{})
+	query := r.db.Debug().Model(&model.MdlUser{})
 
 	if parameter.IDGrup != 0 {
 		query = query.
@@ -34,22 +34,33 @@ func (r *UserRepository) GetAllUsers(parameter ParameterUser) ([]model.MdlUser, 
 	if parameter.TypeUser != "" {
 		switch parameter.TypeUser {
 		case "dosen":
-			query = query.Joins("JOIN mdl_role_assignments ra ON mdl_user.id = ra.userid").
+			subQuery := r.db.Model(&model.MdlUser{}).
+				Joins("JOIN mdl_role_assignments ra ON mdl_user.id = ra.userid").
 				Joins("JOIN mdl_role r ON ra.roleid = r.id").
-				Where("r.shortname = ?", "editingteacher")
+				Where("r.shortname = ?", "editingteacher").
+				Select("mdl_user.id")
+
+			query = query.Where("mdl_user.id IN (?)", subQuery)
 		case "mahasiswa":
-			query = query.Joins("JOIN mdl_role_assignments ra ON mdl_user.id = ra.userid").
+			subQuery := r.db.Model(&model.MdlUser{}).
+				Joins("JOIN mdl_role_assignments ra ON mdl_user.id = ra.userid").
 				Joins("JOIN mdl_role r ON ra.roleid = r.id").
-				Where("r.shortname = ?", "student")
+				Where("r.shortname = ?", "student").
+				Select("mdl_user.id")
+
+			query = query.Where("mdl_user.id IN (?)", subQuery)
 		}
 	}
 
 	if parameter.IdMakul != "" {
-		query = query.
+		subQuery := r.db.Model(&model.MdlUser{}).
 			Joins("JOIN mdl_user_enrolments ue ON ue.userid = mdl_user.id").
 			Joins("JOIN mdl_enrol e ON ue.enrolid = e.id").
 			Joins("JOIN mdl_course c ON e.courseid = c.id").
-			Where("c.idnumber = ?", parameter.IdMakul)
+			Where("c.idnumber = ?", parameter.IdMakul).
+			Select("mdl_user.id")
+
+		query = query.Where("mdl_user.id IN (?)", subQuery)
 	}
 
 	if err := query.Find(&users).Error; err != nil {
@@ -70,7 +81,7 @@ func (r *UserRepository) GetUserBgyID(id int) (*model.MdlUser, error) {
 // GetUserByUsername retrieves a user by their username
 func (r *UserRepository) GetUserByUsername(username string) (*model.MdlUser, error) {
 	var user model.MdlUser
-	err := r.db.Where("username = ?", username).First(&user).Error
+	err := r.db.Debug().Where("username = ?", username).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
