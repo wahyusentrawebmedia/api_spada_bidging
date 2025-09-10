@@ -19,19 +19,31 @@ func NewUserService() *UserService {
 	return &UserService{}
 }
 
+type ParameterUser struct {
+	IdNumberGroup string
+	TypeUser      string // dosen atau mahasiswa
+	Page          int
+	Limit         int
+}
+
 // FetchAllUsersWithPagination retrieves all users with pagination
 func (s *UserService) FetchAllUsersWithPagination(
-	idNumberGroup string,
 	db *gorm.DB,
-	page,
-	limit int,
+	param ParameterUser,
 ) ([]model.MdlUser, error) {
 	parameter := repository.ParameterUser{}
 	repo := repository.NewUserRepository(db)
 
-	if idNumberGroup != "" {
+	if param.TypeUser != "" {
+		if param.TypeUser != "dosen" && param.TypeUser != "mahasiswa" {
+			return nil, errors.New("Tipe user tidak valid: " + param.TypeUser)
+		}
+		parameter.TypeUser = param.TypeUser
+	}
+
+	if param.IdNumberGroup != "" {
 		repoGroups := repository.NewGroupsRepository(db)
-		groups, err := repoGroups.GetByIDNumber(idNumberGroup)
+		groups, err := repoGroups.GetByIDNumber(param.IdNumberGroup)
 		if err != nil {
 			return nil, err
 		}
