@@ -3,6 +3,7 @@ package handler
 import (
 	"api/spada/internal/model"
 	"api/spada/internal/repository"
+	"api/spada/internal/response"
 	"api/spada/internal/service"
 	"api/spada/internal/utils"
 
@@ -64,6 +65,27 @@ func (h *UserHandler) UpdateSingle(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 	return cc.SuccessResponse(resp, "User synced successfully")
+}
+
+// Post /user/change-email
+func (h *UserHandler) ChangeEmail(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	var req response.UserChangeEmailRequest
+	if err := c.BodyParser(&req); err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+
+	err = h.UserService.ChangeEmail(cc, db, req.Username, req.NewEmail)
+	if err != nil {
+		return cc.ErrorResponse(err.Error())
+	}
+	return cc.SuccessResponse(fiber.Map{"action": true}, "Email updated successfully")
 }
 
 // GetDetail /user

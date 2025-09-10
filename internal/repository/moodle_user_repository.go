@@ -108,7 +108,7 @@ func (r *UserRepository) GetUserByUsername(username string) (*model.MdlUser, err
 
 // UpdateUser updates a user's information
 func (r *UserRepository) UpdateUser(user *model.MdlUser) error {
-	if err := r.db.Save(user).Error; err != nil {
+	if err := r.db.Debug().Save(user).Error; err != nil {
 		return err
 	}
 	return nil

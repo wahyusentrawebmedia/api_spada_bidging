@@ -768,6 +768,19 @@ func (s *UserService) ChangePassword(c *utils.CustomContext, repo *repository.Us
 	return repoUsers.UpdateUser(user)
 }
 
+// ChangeEmail changes the email for a user
+func (s *UserService) ChangeEmail(c *utils.CustomContext, db *gorm.DB, username, newEmail string) error {
+	repoUsers := repository.NewUserRepository(db)
+
+	user, err := repoUsers.GetUserByUsername(username)
+	if err != nil {
+		return err
+	}
+
+	user.Email = newEmail
+	return repoUsers.UpdateUser(user)
+}
+
 // generateRandomString generates a random string of given length
 func generateRandomString(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

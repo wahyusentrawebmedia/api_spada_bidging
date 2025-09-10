@@ -42,6 +42,7 @@ func RegisterRoutes(app *fiber.App) {
 		// User CRUD
 		appAkademik.Get("/users", userHandler.GetAllUsers)
 		appAkademik.Post("/users", userHandler.UpdateSingle)
+		appAkademik.Post("/users-change-email", userHandler.ChangeEmail)
 		appAkademik.Post("/users/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswa)
 		appAkademik.Post("/users-makul/:id_makul/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswaMakul)
 		appAkademik.Post("/users-categories/:kode_categories/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswaCategories)
