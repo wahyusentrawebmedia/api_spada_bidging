@@ -16,6 +16,8 @@ func NewSemesterHandler(service service.MoodleSemesterService) *MoodledSemesterH
 	return &MoodledSemesterHandler{service: service}
 }
 
+//
+
 // GET /dSemester
 func (h *MoodledSemesterHandler) GetdSemester(c *fiber.Ctx) error {
 	cc := utils.NewCustomContext(c)
@@ -80,4 +82,26 @@ func (h *MoodledSemesterHandler) SyncdSemester(c *fiber.Ctx) error {
 	}
 
 	return cc.SuccessResponse(nil, "dSemester sync successfully")
+}
+
+// GET /dSemester/:semester_id
+func (h *MoodledSemesterHandler) GetDetailSemester(c *fiber.Ctx) error {
+	cc := utils.NewCustomContext(c)
+
+	semesterID := c.Params("semester_id")
+	if semesterID == "" {
+		return cc.ErrorResponse("semester_id is required")
+	}
+
+	db, err := cc.GetGormConnectionForPerguruanTinggi()
+	if err != nil {
+		return cc.ErrorResponse("get database connection: " + err.Error())
+	}
+
+	dSemester, err := h.service.GetDetailSemesterByNumberId(semesterID, db)
+	if err != nil {
+		return cc.ErrorResponse("get dSemester detail: " + err.Error())
+	}
+
+	return cc.SuccessResponse(dSemester, "Semester detail fetch successfully")
 }

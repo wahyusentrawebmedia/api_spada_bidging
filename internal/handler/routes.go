@@ -20,7 +20,9 @@ func RegisterRoutes(app *fiber.App) {
 	prodiHandler := NewProdisHandler(*service.NewMoodleProdiService())
 	tahunHandler := NewTahunAkademikHandler(*service.NewMoodleTahunAkademikService())
 	semesterHandler := NewSemesterHandler(*service.NewMoodleSemesterService())
-	// moodleHandler := NewMoodleHandler(*service.NewMoodleService())
+	makulHandler := NewMoodleMakulHandler(service.NewMoodleMakulService())
+	categoriHandler := NewCategoriesHandler(*service.NewMoodleCategoriesService())
+	groupHandler := NewGroupsHandler(*service.NewMoodleGroupsService())
 
 	{
 		appSecureuser := app.Group("/dosen", middleware.JWTCheckMiddlewareUser())
@@ -68,6 +70,30 @@ func RegisterRoutes(app *fiber.App) {
 		semesterRoute.Get("/", semesterHandler.GetdSemester)
 		semesterRoute.Post("/", semesterHandler.CreatedSemester)
 		semesterRoute.Post("/sync", semesterHandler.SyncdSemester)
+		semesterRoute.Get("/:semester_id", semesterHandler.GetDetailSemester)
+
+		// Makul
+		makulRoute := appAkademik.Group("/fakultas/:id/prodi/:prodi_id/tahun/:tahun_id/semester/:semester_id/makul")
+
+		// makulRoute.Get("/", makulHandler.GetMakul)
+		// makulRoute.Post("/", makulHandler.CreateMakul)
+		makulRoute.Post("/sync", makulHandler.SyncMakul)
+
+		// Categories
+		categoryRoute := appAkademik.Group("/categories")
+
+		categoryRoute.Get("/prefix/:prefix", categoriHandler.GetCategoriesWithPrefix)
+		categoryRoute.Get("/", categoriHandler.GetCategories)
+		categoryRoute.Post("/", categoriHandler.CreateCategories)
+		categoryRoute.Post("/sync", categoriHandler.SyncCategories)
+
+		// Makul per Semester
+		makulCategoriesRoute := categoryRoute.Group("/:semester_id/makul")
+		makulCategoriesRoute.Post("/sync", makulHandler.SyncMakul)
+
+		// Groups
+		groupsRoute := appAkademik.Group("/groups")
+		groupsRoute.Get("/categories/:categories_id", groupHandler.GetGroupsByCategoriesID)
 
 		// Dosen
 		DosenRoute := appAkademik.Group("")

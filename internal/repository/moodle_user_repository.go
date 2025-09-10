@@ -54,7 +54,7 @@ func (r *UserRepository) UpdateUser(user *model.MdlUser) error {
 
 // CreateUser creates a new user
 func (r *UserRepository) CreateUser(user *model.MdlUser) error {
-	if err := r.db.Debug().Create(user).Error; err != nil {
+	if err := r.db.Create(user).Error; err != nil {
 		return err
 	}
 	return nil

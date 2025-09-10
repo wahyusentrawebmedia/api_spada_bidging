@@ -30,6 +30,18 @@ func (r *MoodleCourseRepository) GetByID(ctx context.Context, id int64) (*model.
 	return &course, nil
 }
 
+// GetByIDNumber
+func (r *MoodleCourseRepository) GetByIDNumber(idnumber string) (*model.Course, error) {
+	var course model.Course
+	if err := r.db.Where("idnumber = ?", idnumber).First(&course).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &course, nil
+}
+
 func (r *MoodleCourseRepository) Update(ctx context.Context, course *model.Course) error {
 	return r.db.WithContext(ctx).Save(course).Error
 }

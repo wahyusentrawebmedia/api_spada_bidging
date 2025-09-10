@@ -23,7 +23,7 @@ func (r *MoodleFakultasRepository) AddNewFakultas(fakultas *model.MdlCourseCateg
 func (r *MoodleFakultasRepository) GetAllFakultas() ([]model.MdlCourseCategory, error) {
 	var fakultas []model.MdlCourseCategory
 
-	if err := r.db.Debug().Find(&fakultas).Error; err != nil {
+	if err := r.db.Find(&fakultas).Error; err != nil {
 		return nil, err
 	}
 	return fakultas, nil
@@ -49,12 +49,32 @@ func (r *MoodleFakultasRepository) GetAllProdi(kodeFakultas string) ([]model.Mdl
 	var prodi []model.MdlCourseCategory
 
 	var prodiFakultas model.MdlCourseCategory
-	if err := r.db.Debug().Where("idnumber = ?", kodeFakultas).First(&prodiFakultas).Error; err != nil {
+	if err := r.db.Where("idnumber = ?", kodeFakultas).First(&prodiFakultas).Error; err != nil {
 		return nil, err
 	}
 
-	if err := r.db.Debug().Where("parent = ?", prodiFakultas.ID).Find(&prodi).Error; err != nil {
+	if err := r.db.Where("parent = ?", prodiFakultas.ID).Find(&prodi).Error; err != nil {
 		return nil, err
 	}
 	return prodi, nil
+}
+
+// GetWithPrefix retrieves all fakultas with a specific prefix in their IDNumber
+func (r *MoodleFakultasRepository) GetWithPrefix(prefix string) ([]model.MdlCourseCategory, error) {
+	var fakultas []model.MdlCourseCategory
+
+	if err := r.db.Where("idnumber LIKE ?", prefix+"%").Find(&fakultas).Error; err != nil {
+		return nil, err
+	}
+	return fakultas, nil
+}
+
+// GetWithPrefixEnd retrieves all fakultas with a specific prefix in their IDNumber
+func (r *MoodleFakultasRepository) GetWithPrefixEnd(prefix string) ([]model.MdlCourseCategory, error) {
+	var fakultas []model.MdlCourseCategory
+
+	if err := r.db.Where("idnumber LIKE ?", "%"+prefix).Find(&fakultas).Error; err != nil {
+		return nil, err
+	}
+	return fakultas, nil
 }

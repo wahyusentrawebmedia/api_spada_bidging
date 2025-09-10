@@ -29,6 +29,15 @@ func (cc *CustomContext) SuccessResponse(data interface{}, message string) error
 	})
 }
 
+// ErrorResponseWithArrayError is used to return error response with array of errors
+func (cc *CustomContext) ErrorResponseWithArrayError(messages []string) error {
+	return cc.Status(fiber.StatusBadRequest).JSON(response.DefaultResponse{
+		Status:  false,
+		Message: "There are some errors",
+		Errors:  messages,
+	})
+}
+
 func (cc *CustomContext) ErrorResponse(message string) error {
 	return cc.Status(fiber.StatusBadRequest).JSON(response.DefaultResponse{
 		Status:  false,
