@@ -563,7 +563,7 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 			return &model.UserSyncResponse{
 				Action:   false,
 				Username: userExists.Username,
-				Password: userExists.Password,
+				Password: user.Password,
 				Pesan:    "Sinkronisasi Gagal : " + err.Error(),
 				IdSpada:  userExists.ID,
 			}, nil
@@ -571,7 +571,7 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 			return &model.UserSyncResponse{
 				Action:   true,
 				Username: userExists.Username,
-				Password: userExists.Password,
+				Password: user.Password,
 				Pesan:    "Sinkronisasi Berhasil",
 			}, nil
 		}
