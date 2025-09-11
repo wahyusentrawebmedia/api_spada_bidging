@@ -561,7 +561,7 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 
 		if err != nil {
 			return &model.UserSyncResponse{
-				Action:   true,
+				Action:   false,
 				Username: userExists.Username,
 				Password: userExists.Password,
 				Pesan:    "Sinkronisasi Gagal : " + err.Error(),
@@ -569,7 +569,7 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 			}, nil
 		} else {
 			return &model.UserSyncResponse{
-				Action:   false,
+				Action:   true,
 				Username: userExists.Username,
 				Password: userExists.Password,
 				Pesan:    "Sinkronisasi Berhasil",
@@ -653,14 +653,14 @@ func (s *UserService) SyncUser(c *utils.CustomContext, repo *repository.UserRepo
 				Action:   false,
 				Username: userExists.Username,
 				Password: userExists.Password,
-				Pesan:    "Sinkronisasi Berhasil",
+				Pesan:    "Sinkronisasi Gagal",
 			}, nil
 		} else {
 			return &model.UserSyncResponse{
 				Action:   true,
 				Username: userExists.Username,
 				Password: userExists.Password,
-				Pesan:    "Sinkronisasi Gagal",
+				Pesan:    "Sinkronisasi Berhasil",
 				IdSpada:  userExists.ID,
 			}, nil
 		}
