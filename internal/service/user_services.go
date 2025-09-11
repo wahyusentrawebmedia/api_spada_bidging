@@ -480,8 +480,20 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 	syncCategories := func(user model.MdlUser) error {
 		if params.KodeCategories != "" {
 			categories, err := repoProdi.GetFakultasByIDNumber(params.KodeCategories)
-			if err != nil {
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 				return errors.New("Tidak bisa mendapatkan categories untuk kode categories " + params.KodeCategories)
+			}
+			if categories == nil {
+				newCategories := model.MdlCourseCategory{
+					Name:     params.KodeCategories,
+					IDNumber: utils.StringPtr(params.KodeCategories),
+					// Tambahkan field lain jika diperlukan
+				}
+				err := repoProdi.AddNewFakultas(&newCategories)
+				if err != nil {
+					return errors.New("Tidak bisa membuat categories untuk kode categories " + params.KodeCategories)
+				}
+				categories = &newCategories
 			}
 
 			cohort, err := repoCohort.GetCohortByIDNumber(*categories.IDNumber)
