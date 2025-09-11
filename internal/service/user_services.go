@@ -527,6 +527,7 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 	}
 
 	if userExists != nil {
+		userExists.Password = repoApiMoodle.HashingPassword(user.Password) // You may want to hash the password here
 		userExists.FirstName = user.FirstName
 		userExists.LastName = user.LastName
 		userExists.Email = user.Email
@@ -641,6 +642,7 @@ func (s *UserService) SyncUser(c *utils.CustomContext, repo *repository.UserRepo
 	}
 
 	if userExists != nil {
+		userExists.Password = repoApiMoodle.HashingPassword(user.Password) // You may want to hash the password here
 		userExists.FirstName = user.FirstName
 		userExists.LastName = user.LastName
 		userExists.Email = user.Email
