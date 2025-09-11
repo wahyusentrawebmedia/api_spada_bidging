@@ -385,15 +385,6 @@ func (s *UserService) RegisterUserToCourse(c *utils.CustomContext, db *gorm.DB, 
 			Name:         utils.StringPtr("Manual enrolment"),
 			TimeCreated:  time.Now().Unix(),
 			TimeModified: time.Now().Unix(),
-			CustomChar1:  nil,
-			CustomChar2:  nil,
-			CustomChar3:  nil,
-			CustomDec1:   nil,
-			CustomDec2:   nil,
-			CustomText1:  nil,
-			CustomText2:  nil,
-			CustomText3:  nil,
-			CustomText4:  nil,
 		}
 		err := repoEnrol.Create(c.Context(), &newEnrol)
 		if err != nil {
