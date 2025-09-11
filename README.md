@@ -35,3 +35,6 @@ Berikan file /dep_moodle/api_hashing.php ke root folder moodle, akses api_hashin
  * - Pastikan untuk selalu menggunakan algoritma hashing yang aman dan terbaru.
  * - Dokumentasi lebih lanjut dapat ditemukan pada modul SPADA.
  */
+
+## Image Infra
+ ![alt text](image.png)
