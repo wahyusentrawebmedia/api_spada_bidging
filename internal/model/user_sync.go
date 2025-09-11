@@ -22,6 +22,7 @@ type UserSyncResponse struct {
 }
 
 type UserChangePasswordRequest struct {
-	OldPassword string `json:"old_password" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required"`
+	Username    string `json:"username" validate:"required"`
+	OldPassword string `json:"password_lama" validate:"required"`
+	NewPassword string `json:"password_baru" validate:"required"`
 }

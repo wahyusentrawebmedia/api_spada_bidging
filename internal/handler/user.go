@@ -119,7 +119,7 @@ func (h *UserHandler) UpdatePassword(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	err = h.UserService.ChangePassword(cc, repository.NewUserRepository(db), cc.GetUsername(), req.OldPassword, req.NewPassword)
+	err = h.UserService.ChangePassword(cc, repository.NewUserRepository(db), req.Username, req.OldPassword, req.NewPassword)
 	if err != nil {
 		return cc.ErrorResponse(err.Error())
 	}

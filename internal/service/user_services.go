@@ -755,6 +755,10 @@ func (s *UserService) ChangePassword(c *utils.CustomContext, repo *repository.Us
 		return err
 	}
 
+	if user == nil {
+		return errors.New("User not found")
+	}
+
 	user.Password = hashedNewPassword
 	return repoUsers.UpdateUser(user)
 }

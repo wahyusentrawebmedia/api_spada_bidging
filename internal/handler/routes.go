@@ -25,11 +25,13 @@ func RegisterRoutes(app *fiber.App) {
 	groupHandler := NewGroupsHandler(*service.NewMoodleGroupsService())
 
 	{
-		appSecureuser := app.Group("/dosen", middleware.JWTCheckMiddlewareUser())
+		appSecureuser := app.Group("/users", middleware.JWTCheckMiddlewareUser())
 
 		// User CRUD
 		appSecureuser.Get("/", userHandler.GetDetail)
 		appSecureuser.Post("/", userHandler.UpdateSingle)
+		appSecureuser.Post("/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswa)
+		appSecureuser.Post("/update-password", userHandler.UpdatePassword)
 	}
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
