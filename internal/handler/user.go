@@ -174,6 +174,8 @@ func (h *UserHandler) SyncDosenMahasiswaMakul(c *fiber.Ctx) error {
 
 	kodeMakul := c.Params("id_makul")
 
+	kodeMakul = utils.ReplaceAll(kodeMakul, "%20", " ")
+
 	var req model.DosenMahasiwaSyncRequest
 	if err := c.BodyParser(&req); err != nil {
 		return cc.ErrorResponse(err.Error())
@@ -199,6 +201,8 @@ func (h *UserHandler) SyncDosenMahasiswaCategories(c *fiber.Ctx) error {
 	cc := utils.NewCustomContext(c)
 
 	kodeCategories := c.Params("kode_categories")
+
+	kodeCategories = utils.ReplaceAll(kodeCategories, "%20", " ")
 
 	var req model.DosenMahasiwaSyncRequest
 	if err := c.BodyParser(&req); err != nil {
