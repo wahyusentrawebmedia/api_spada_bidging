@@ -746,9 +746,9 @@ func (s *UserService) ChangePassword(c *utils.CustomContext, repo *repository.Us
 		return err
 	}
 
-	// if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
-	// 	return errors.New("Old password is incorrect")
-	// }
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
+		return errors.New("Old password is incorrect")
+	}
 
 	hashedNewPassword := repoApiMoodle.HashingPassword(newPassword)
 	if err != nil {
