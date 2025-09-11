@@ -397,7 +397,7 @@ func (s *UserService) RegisterUserToCourse(c *utils.CustomContext, db *gorm.DB, 
 		}
 		err := repoEnrol.Create(c.Context(), &newEnrol)
 		if err != nil {
-			return errors.New("Tidak bisa membuat enrol untuk user " + userType)
+			return errors.New("Tidak bisa membuat enrol untuk user " + userType + " : " + err.Error())
 		}
 		enrol = &newEnrol
 	}
