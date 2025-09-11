@@ -611,7 +611,7 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 			return nil, err
 		}
 
-		if err := syncCategories(*userExists); err != nil {
+		if err := syncCategories(simpan); err != nil {
 			return nil, err
 		}
 
