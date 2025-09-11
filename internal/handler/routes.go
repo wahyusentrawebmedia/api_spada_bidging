@@ -30,6 +30,7 @@ func RegisterRoutes(app *fiber.App) {
 		// User CRUD
 		appSecureuser.Get("/", userHandler.GetDetail)
 		appSecureuser.Post("/", userHandler.UpdateSingle)
+		appSecureuser.Post("/dosen-mahasiswa-sync-categories/:kode_categories", userHandler.SyncDosenMahasiswaCategories)
 		appSecureuser.Post("/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswa)
 		appSecureuser.Post("/update-password", userHandler.UpdatePassword)
 	}
