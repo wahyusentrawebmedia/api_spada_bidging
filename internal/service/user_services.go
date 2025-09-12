@@ -173,9 +173,9 @@ func (s *UserService) SyncUserBatch(c *utils.CustomContext, repo *repository.Use
 	}
 	return results, nil
 }
-
 func (s *UserService) Role(c *utils.CustomContext, db *gorm.DB, userType string) (*model.Role, error) {
 	repoRole := repository.NewMoodleRoleRepository(db)
+	repoRoleCapability := repository.NewRoleCapabilityRepository(db)
 
 	var role *model.Role
 	var err error
@@ -201,6 +201,20 @@ func (s *UserService) Role(c *utils.CustomContext, db *gorm.DB, userType string)
 			}
 			role = &newRole
 		}
+
+		// Set role capabilities for dosen (editingteacher)
+		capabilities := []repository.SetCapabilityParams{
+			{Name: "moodle/user:editprofile", Allowed: false},
+			{Name: "moodle/user:editprofileother", Allowed: false},
+		}
+
+		for _, cap := range capabilities {
+			err = repoRoleCapability.SetCapability(c.Context(), role.ID, cap.Name, capabilities)
+			if err != nil {
+				return nil, errors.New("Tidak bisa mengatur hak akses " + cap.Name + " untuk dosen")
+			}
+		}
+
 	case "mahasiswa":
 		role, err = repoRole.GetByID(c.Context(), 5) // Assuming 5 is the ID for student
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -220,6 +234,20 @@ func (s *UserService) Role(c *utils.CustomContext, db *gorm.DB, userType string)
 			}
 			role = &newRole
 		}
+
+		// Set role capabilities for dosen (editingteacher)
+		capabilities := []repository.SetCapabilityParams{
+			{Name: "moodle/user:editprofile", Allowed: false},
+			{Name: "moodle/user:editprofileother", Allowed: false},
+		}
+
+		for _, cap := range capabilities {
+			err = repoRoleCapability.SetCapability(c.Context(), role.ID, cap.Name, capabilities)
+			if err != nil {
+				return nil, errors.New("Tidak bisa mengatur hak akses " + cap.Name + " untuk dosen")
+			}
+		}
+
 	}
 	return role, nil
 }
