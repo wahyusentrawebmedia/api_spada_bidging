@@ -189,11 +189,11 @@ func (s *UserService) Role(c *utils.CustomContext, db *gorm.DB, userType string)
 
 		if role == nil {
 			newRole := model.Role{
-				Name:        "Editing Teacher",
-				ShortName:   "editingteacher",
-				Description: "A teacher with editing rights",
+				Name:        "Dosen",
+				ShortName:   "dosen",
+				Description: "A dosen",
 				SortOrder:   0,
-				Archetype:   "editingteacher",
+				Archetype:   "dosen",
 			}
 			err := repoRole.Create(c.Context(), &newRole)
 			if err != nil {
@@ -222,11 +222,11 @@ func (s *UserService) Role(c *utils.CustomContext, db *gorm.DB, userType string)
 		}
 		if role == nil {
 			newRole := model.Role{
-				Name:        "Student",
-				ShortName:   "student",
-				Description: "A student",
+				Name:        "Mahasiswa",
+				ShortName:   "mahasiswa",
+				Description: "A mahasiswa",
 				SortOrder:   0,
-				Archetype:   "student",
+				Archetype:   "mahasiswa",
 			}
 			err := repoRole.Create(c.Context(), &newRole)
 			if err != nil {
