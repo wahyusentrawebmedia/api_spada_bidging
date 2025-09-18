@@ -70,7 +70,7 @@ func (h *MoodleCategoriesHandler) SyncCategories(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	errs := h.service.BatchCategoriesSync(req, db)
+	datas, errs := h.service.BatchCategoriesSync(req, db)
 	if errs != nil {
 		var errMsgs []string
 		for _, err := range errs {
@@ -79,7 +79,7 @@ func (h *MoodleCategoriesHandler) SyncCategories(c *fiber.Ctx) error {
 		return cc.ErrorResponse("Batch sync errors: " + utils.JoinStrings(errMsgs, "; "))
 	}
 
-	return cc.SuccessResponse(nil, "Categories sync successfully")
+	return cc.SuccessResponse(datas, "Categories sync successfully")
 }
 
 // GET /Categories-with-prefix

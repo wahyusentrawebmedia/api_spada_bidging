@@ -121,18 +121,21 @@ func (s *MoodleCategoriesService) GetCategories(db *gorm.DB) ([]model.MdlCourseC
 }
 
 // BatchCategoriesSync sync all Categories from all perguruan tinggi and returns a list of errors if any
-func (s *MoodleCategoriesService) BatchCategoriesSync(req []response.MoodleCategoriesRequest, db *gorm.DB) []error {
+func (s *MoodleCategoriesService) BatchCategoriesSync(req []response.MoodleCategoriesRequest, db *gorm.DB) ([]model.MdlCourseCategory, []error) {
+	var createdCategories []model.MdlCourseCategory
 	var errs []error
 	for _, config := range req {
-		_, err := s.AddCategories(config, db)
+		category, err := s.AddCategories(config, db)
 		if err != nil {
 			errs = append(errs, err)
+		} else {
+			createdCategories = append(createdCategories, *category)
 		}
 	}
 	if len(errs) > 0 {
-		return errs
+		return createdCategories, errs
 	}
-	return nil
+	return createdCategories, nil
 }
 
 // GetKeysWithPrefix returns all keys in the map that start with the given prefix
