@@ -614,6 +614,7 @@ func (s *UserService) SyncUserDosenMahasiswa(c *utils.CustomContext, db *gorm.DB
 				Username: userExists.Username,
 				Password: user.Password,
 				Pesan:    "Sinkronisasi Berhasil",
+				IdSpada:  userExists.ID,
 			}, nil
 		}
 	} else {

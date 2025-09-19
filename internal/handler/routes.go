@@ -24,6 +24,11 @@ func RegisterRoutes(app *fiber.App) {
 	categoriHandler := NewCategoriesHandler(*service.NewMoodleCategoriesService())
 	groupHandler := NewGroupsHandler(*service.NewMoodleGroupsService())
 
+	moodleGradesHandler := NewMoodleGradesHandler(*service.NewMoodleGradesService())
+	// moodleScaleHandler := NewMoodleScaleHandler(*service.NewMoodleScaleService())
+	// moodleGradesCategoriesHandler := NewMoodleGradesCategoriesHandler(*service.NewMoodleGradesCategoriesService())
+	moodleGradesGradesHandler := NewMoodleGradesGradesItemsHandler(service.NewMoodleGradesGradesService())
+
 	{
 		appSecureuser := app.Group("/users", middleware.JWTCheckMiddlewareUser())
 
@@ -33,6 +38,26 @@ func RegisterRoutes(app *fiber.App) {
 		appSecureuser.Post("/dosen-mahasiswa-sync-categories/:kode_categories", userHandler.SyncDosenMahasiswaCategories)
 		appSecureuser.Post("/dosen-mahasiswa-sync", userHandler.SyncDosenMahasiswa)
 		appSecureuser.Post("/update-password", userHandler.UpdatePassword)
+	}
+
+	{
+		appSecure := app.Group("/moodle", middleware.JWTCheckMiddlewareUser())
+
+		// Moodle Grades CRUD
+		appSecure.Post("/create-aspek-nilai", moodleGradesHandler.CreateAspekNilai)
+		appSecure.Post("/create-aspek-nilai-sync", moodleGradesHandler.CreateAspekNilaiSync)
+
+		// Moodle Grades Categories CRUD
+		// appSecure.Post("/create-grade-categories", moodleGradesHandler.CreateGradeCategories)
+		// appSecure.Post("/create-grade-categories-sync", moodleGradesHandler.CreateGradeCategoriesSync)
+
+		// Moodle Grades Items CRUD
+		appSecure.Post("/create-grade-grades", moodleGradesGradesHandler.CreateGradeItems)
+		appSecure.Post("/create-grade-grades-sync", moodleGradesGradesHandler.CreateGradeItemsSync)
+
+		// Moodle Scale CRUD
+		// appSecure.Post("/create-scale", moodleScaleHandler.CreateScale)
+		// appSecure.Post("/create-scale-sync", moodleScaleHandler.CreateScaleSync)
 	}
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
@@ -95,8 +120,8 @@ func RegisterRoutes(app *fiber.App) {
 		categoryRoute.Post("/sync", categoriHandler.SyncCategories)                   // /akademik/categories/sync
 		{
 			// Makul per Semester
-			makulCategoriesRoute := categoryRoute.Group("/:semester_id/makul")
-			makulCategoriesRoute.Post("/sync", makulHandler.SyncMakul)
+			makulCategoriesRoute := categoryRoute.Group("/:semester_id/makul") // /akademik/categories/:semester_id/makul
+			makulCategoriesRoute.Post("/sync", makulHandler.SyncMakul)         // /akademik/categories/:semester_id/makul/sync
 		}
 
 		// Groups

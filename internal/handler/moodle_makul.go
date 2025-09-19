@@ -36,7 +36,7 @@ func (h *MoodleMakulHandler) SyncMakul(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	errs := h.service.SyncMakulAll(req, parent, db)
+	courses, groups, errs := h.service.SyncMakulAll(req, parent, db)
 	if errs != nil {
 		var errMsgs []string
 		for _, err := range errs {
@@ -45,5 +45,8 @@ func (h *MoodleMakulHandler) SyncMakul(c *fiber.Ctx) error {
 		return cc.ErrorResponseWithArrayError(errMsgs)
 	}
 
-	return cc.SuccessResponse(nil, "Fakultas sync successfully")
+	return cc.SuccessResponse(map[string]interface{}{
+		"courses": courses,
+		"groups":  groups,
+	}, "Makul sync successfully")
 }
