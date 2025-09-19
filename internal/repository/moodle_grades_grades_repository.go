@@ -13,6 +13,7 @@ type MoodleGradesGradesRepository interface {
 	Update(ctx context.Context, grade *model.GradeGrade) error
 	Delete(ctx context.Context, id int64) error
 	List(ctx context.Context, limit, offset int) ([]model.GradeGrade, error)
+	GetByUserIDAndItemID(ctx context.Context, userID, itemID int64) (*model.GradeGrade, error)
 }
 
 type moodleGradesGradesRepository struct {
@@ -21,6 +22,17 @@ type moodleGradesGradesRepository struct {
 
 func NewMoodleGradesGradesRepository(db *gorm.DB) MoodleGradesGradesRepository {
 	return &moodleGradesGradesRepository{db: db}
+}
+
+func (r *moodleGradesGradesRepository) GetByUserIDAndItemID(ctx context.Context, userID, itemID int64) (*model.GradeGrade, error) {
+	var grade model.GradeGrade
+	err := r.db.WithContext(ctx).Debug().
+		Where("userid = ? AND itemid = ?", userID, itemID).
+		First(&grade).Error
+	if err != nil {
+		return nil, err
+	}
+	return &grade, nil
 }
 
 func (r *moodleGradesGradesRepository) Create(ctx context.Context, grade *model.GradeGrade) error {

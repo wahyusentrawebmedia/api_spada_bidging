@@ -21,17 +21,22 @@ type moodleGradesItemsService struct{}
 func (s *moodleGradesItemsService) CreateGradeItems(db *gorm.DB, req *model.GradeGrade) (*model.GradeGrade, error) {
 	repoGradesGrade := repository.NewMoodleGradesGradesRepository(db)
 
-	existing, err := repoGradesGrade.GetByID(nil, req.ID)
+	existing, err := repoGradesGrade.GetByUserIDAndItemID(nil, req.UserID, req.ItemID)
+
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
+
 	if existing != nil {
+		req.ID = existing.ID
 		// Update if exists
 		if err := repoGradesGrade.Update(nil, req); err != nil {
 			return nil, err
 		}
 		return req, nil
 	}
+
+	req.ID = 0 // Ensure ID is zero for new record
 
 	if err := repoGradesGrade.Create(nil, req); err != nil {
 		return nil, err
