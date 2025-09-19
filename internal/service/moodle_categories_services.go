@@ -12,6 +12,11 @@ import (
 type MoodleCategoriesService struct {
 }
 
+// ptrString returns a pointer to the given string.
+func ptrString(s string) *string {
+	return &s
+}
+
 func NewMoodleCategoriesService() *MoodleCategoriesService {
 	return &MoodleCategoriesService{}
 }
@@ -95,6 +100,19 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 		}
 	}
 
+	// carikan id parent dan path parent dari context
+	parentContext, err := repoContext.GetByInstanceIDAndLevel(nil, int(idParent), 40)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	var deepthContext int64 = 1
+	var parentContextPath string
+	if parentContext != nil {
+		deepthContext = int64(parentContext.Depth) + 1
+		parentContextPath = *parentContext.Path
+	}
+
 	// buatkan context untuk course categories jika belum ada
 	existingContext, err := repoContext.GetByInstanceIDAndLevel(nil, int(Categories.ID), 40)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -104,11 +122,19 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 		context := model.MdlContext{
 			ContextLevel: 40, // Level for course category
 			InstanceID:   Categories.ID,
+			Path:         &parentContextPath,
 		}
 
 		if err := repoContext.Create(nil, &context); err != nil {
-			return nil, err
+			existingContext.Path = ptrString(parentContextPath + fmt.Sprintf("/%d", existingContext.ID))
 		}
+	}
+	// Update path dan depth jika context sudah ada
+	existingContext.Depth = int8(deepthContext)
+	existingContext.Path = ptrString(parentContextPath + fmt.Sprintf("/%d", existingContext.ID))
+
+	if err := repoContext.Update(nil, existingContext); err != nil {
+		return nil, err
 	}
 
 	// Cek apakah cohort dengan IDNumber yang sama sudah ada, jika tidak ada maka buatkan
