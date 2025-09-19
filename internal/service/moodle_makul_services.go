@@ -46,7 +46,7 @@ func (s *MoodleMakulService) SyncMakul(req response.MoodleMakulRequest, parent s
 	idnumber := req.IDNumberCourse
 
 	// getParent
-	parentCategories, err := repoCategories.GetFakultasByIDNumber(parent)
+	parentCategories, err := repoCategories.GetCourseCategoriesByIDNumber(parent)
 	if err != nil {
 		return nil, nil, errors.New("parent kategori tidak ditemukan")
 	}

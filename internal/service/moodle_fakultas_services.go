@@ -21,7 +21,7 @@ func (s *MoodleFakultasService) AddFakultas(req response.MoodleFakultasRequest, 
 	var repoContext = repository.NewMoodleContextRepository(db)
 
 	// Cek apakah fakultas dengan IDNumber yang sama sudah ada
-	existingFakultas, err := repoFakultas.GetFakultasByIDNumber(req.IDNumber)
+	existingFakultas, err := repoFakultas.GetCourseCategoriesByIDNumber(req.IDNumber)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (s *MoodleFakultasService) AddFakultas(req response.MoodleFakultasRequest, 
 		// Jika ada, update data fakultas
 		existingFakultas.Name = req.Name
 		existingFakultas.Description = &req.Description
-		if err := repoFakultas.UpdateFakultas(existingFakultas); err != nil {
+		if err := repoFakultas.UpdateCourseCategories(existingFakultas); err != nil {
 			return nil, err
 		}
 		fakultas = *existingFakultas
@@ -42,7 +42,7 @@ func (s *MoodleFakultasService) AddFakultas(req response.MoodleFakultasRequest, 
 		fakultas.IDNumber = &req.IDNumber
 		fakultas.Description = &req.Description
 
-		if err := repoFakultas.AddNewFakultas(&fakultas); err != nil {
+		if err := repoFakultas.CreateCourseCategories(&fakultas); err != nil {
 			return nil, err
 		}
 

@@ -4,6 +4,7 @@ import (
 	"api/spada/internal/model"
 	"api/spada/internal/repository"
 	"api/spada/internal/response"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -15,14 +16,14 @@ func NewMoodleCategoriesService() *MoodleCategoriesService {
 	return &MoodleCategoriesService{}
 }
 
-// AddCategories adds a new Categories to the database
-func (s *MoodleCategoriesService) AddCategories(req response.MoodleCategoriesRequest, db *gorm.DB) (*model.MdlCourseCategory, error) {
+// CreateourseCategories adds a new Categories to the database
+func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCategoriesRequest, db *gorm.DB) (*model.MdlCourseCategory, error) {
 	var repoCategories = repository.NewMoodleFakultasRepository(db)
 	var repoContext = repository.NewMoodleContextRepository(db)
 	var repoCohort = repository.NewMoodleCohortRepository(db)
 
 	// Cek apakah Categories dengan IDNumber yang sama sudah ada
-	existingCategories, err := repoCategories.GetFakultasByIDNumber(req.IDNumber)
+	existingCategories, err := repoCategories.GetCourseCategoriesByIDNumber(req.IDNumber)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func (s *MoodleCategoriesService) AddCategories(req response.MoodleCategoriesReq
 	idParent := int64(0)
 
 	if req.Parent != "" {
-		fakultas, err := repoCategories.GetFakultasByIDNumber(req.Parent)
+		fakultas, err := repoCategories.GetCourseCategoriesByIDNumber(req.Parent)
 		if err != nil {
 			return nil, err
 		}
@@ -40,16 +41,33 @@ func (s *MoodleCategoriesService) AddCategories(req response.MoodleCategoriesReq
 
 	var Categories model.MdlCourseCategory
 
+	// Hitung kedalaman (Deepth) berdasarkan parent-child relationship
+	Deepth := 1
+	ParentPath := ""
+	currentParent := existingCategories.Parent
+	for currentParent != 0 {
+		parentCategory, err := repoCategories.GetCourseCategoriesByID(currentParent)
+		if err != nil {
+			break
+		}
+		Deepth++
+		currentParent = parentCategory.Parent
+		ParentPath = parentCategory.Path + "/" + ParentPath
+	}
+
 	if existingCategories != nil && existingCategories.ID > 0 {
 		// Jika ada, update data Categories
 		existingCategories.Name = req.Name
 		existingCategories.Description = &req.Description
+		existingCategories.Depth = int64(Deepth)
+		// Set path dengan ID dia sendiri
+		existingCategories.Path = fmt.Sprintf("/%d", existingCategories.ID)
 
 		if idParent != 0 {
 			existingCategories.Parent = idParent
 		}
 
-		if err := repoCategories.UpdateFakultas(existingCategories); err != nil {
+		if err := repoCategories.UpdateCourseCategories(existingCategories); err != nil {
 			return nil, err
 		}
 		Categories = *existingCategories
@@ -58,15 +76,31 @@ func (s *MoodleCategoriesService) AddCategories(req response.MoodleCategoriesReq
 		Categories.Name = req.Name
 		Categories.IDNumber = &req.IDNumber
 		Categories.Description = &req.Description
+		existingCategories.Depth = int64(Deepth)
 
 		if idParent != 0 {
 			Categories.Parent = idParent
 		}
 
-		if err := repoCategories.AddNewFakultas(&Categories); err != nil {
+		if err := repoCategories.CreateCourseCategories(&Categories); err != nil {
 			return nil, err
 		}
 
+		// Set path dengan ID dia sendiri
+		Categories.Path = fmt.Sprintf("/%d", Categories.ID)
+
+		// Update path di database setelah create
+		if err := repoCategories.UpdateCourseCategories(&Categories); err != nil {
+			return nil, err
+		}
+	}
+
+	// buatkan context untuk course categories jika belum ada
+	existingContext, err := repoContext.GetByInstanceIDAndLevel(nil, int(Categories.ID), 40)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	if existingContext == nil || existingContext.ID == 0 {
 		context := model.MdlContext{
 			ContextLevel: 40, // Level for course category
 			InstanceID:   Categories.ID,
@@ -96,7 +130,7 @@ func (s *MoodleCategoriesService) AddCategories(req response.MoodleCategoriesReq
 	if len(req.Children) > 0 {
 		for _, child := range req.Children {
 			child.Parent = req.IDNumber
-			_, err := s.AddCategories(child, db)
+			_, err := s.CreateourseCategories(child, db)
 			if err != nil {
 				return nil, err
 			}
@@ -125,7 +159,7 @@ func (s *MoodleCategoriesService) BatchCategoriesSync(req []response.MoodleCateg
 	var createdCategories []model.MdlCourseCategory
 	var errs []error
 	for _, config := range req {
-		category, err := s.AddCategories(config, db)
+		category, err := s.CreateourseCategories(config, db)
 		if err != nil {
 			errs = append(errs, err)
 		} else {

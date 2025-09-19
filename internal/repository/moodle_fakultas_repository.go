@@ -14,8 +14,8 @@ type MoodleFakultasRepository struct {
 	db *gorm.DB
 }
 
-// AddNewFakultas adds a new fakultas to the database
-func (r *MoodleFakultasRepository) AddNewFakultas(fakultas *model.MdlCourseCategory) error {
+// CreateCourseCategories adds a new fakultas to the database
+func (r *MoodleFakultasRepository) CreateCourseCategories(fakultas *model.MdlCourseCategory) error {
 	return r.db.Create(fakultas).Error
 }
 
@@ -29,8 +29,18 @@ func (r *MoodleFakultasRepository) GetAllFakultas() ([]model.MdlCourseCategory, 
 	return fakultas, nil
 }
 
+// GetCourseCategoriesByID retrieves a fakultas by its ID
+func (r *MoodleFakultasRepository) GetCourseCategoriesByID(id int64) (*model.MdlCourseCategory, error) {
+	var fakultas model.MdlCourseCategory
+
+	if err := r.db.First(&fakultas, id).Error; err != nil {
+		return nil, err
+	}
+	return &fakultas, nil
+}
+
 // GetFakultasByKode retrieves a fakultas by its kode
-func (r *MoodleFakultasRepository) GetFakultasByIDNumber(kode string) (*model.MdlCourseCategory, error) {
+func (r *MoodleFakultasRepository) GetCourseCategoriesByIDNumber(kode string) (*model.MdlCourseCategory, error) {
 	var fakultas model.MdlCourseCategory
 
 	if err := r.db.Where("idnumber = ?", kode).First(&fakultas).Error; err != nil {
@@ -39,8 +49,8 @@ func (r *MoodleFakultasRepository) GetFakultasByIDNumber(kode string) (*model.Md
 	return &fakultas, nil
 }
 
-// UpdateFakultas updates an existing fakultas in the database
-func (r *MoodleFakultasRepository) UpdateFakultas(fakultas *model.MdlCourseCategory) error {
+// UpdateCourseCategories updates an existing fakultas in the database
+func (r *MoodleFakultasRepository) UpdateCourseCategories(fakultas *model.MdlCourseCategory) error {
 	return r.db.Save(fakultas).Error
 }
 

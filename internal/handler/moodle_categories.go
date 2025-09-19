@@ -48,7 +48,7 @@ func (h *MoodleCategoriesHandler) CreateCategories(c *fiber.Ctx) error {
 		return cc.ErrorResponse(err.Error())
 	}
 
-	Categories, err := h.service.AddCategories(req, db)
+	Categories, err := h.service.CreateourseCategories(req, db)
 	if err != nil {
 		return cc.ErrorResponse(err.Error())
 	}

@@ -22,12 +22,12 @@ func (s *MoodleSemesterService) AddSemester(req response.MoodleSemesterRequest, 
 	var repoCohort = repository.NewMoodleCohortRepository(db)
 
 	// getParent
-	fakultas, err := repoSemester.GetFakultasByIDNumber(req.Parent)
+	fakultas, err := repoSemester.GetCourseCategoriesByIDNumber(req.Parent)
 	if err != nil {
 		return nil, err
 	}
 	// Cek apakah Semester dengan IDNumber yang sama sudah ada
-	existingSemester, err := repoSemester.GetFakultasByIDNumber(req.IDNumber)
+	existingSemester, err := repoSemester.GetCourseCategoriesByIDNumber(req.IDNumber)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (s *MoodleSemesterService) AddSemester(req response.MoodleSemesterRequest, 
 		existingSemester.Name = req.Name
 		existingSemester.Description = &req.Description
 		existingSemester.Parent = fakultas.ID
-		if err := repoSemester.UpdateFakultas(existingSemester); err != nil {
+		if err := repoSemester.UpdateCourseCategories(existingSemester); err != nil {
 			return nil, err
 		}
 		Semester = *existingSemester
@@ -51,7 +51,7 @@ func (s *MoodleSemesterService) AddSemester(req response.MoodleSemesterRequest, 
 		Semester.Description = &req.Description
 		Semester.Parent = fakultas.ID
 
-		if err := repoSemester.AddNewFakultas(&Semester); err != nil {
+		if err := repoSemester.CreateCourseCategories(&Semester); err != nil {
 			return nil, err
 		}
 
@@ -135,7 +135,7 @@ func (s *MoodleSemesterService) BatchSemesterSync(req []response.MoodleSemesterR
 func (s *MoodleSemesterService) GetDetailSemesterByNumberId(idnumber string, db *gorm.DB) (*model.MdlCourseCategory, error) {
 	var repoSemester = repository.NewMoodleFakultasRepository(db)
 
-	Semester, err := repoSemester.GetFakultasByIDNumber(idnumber)
+	Semester, err := repoSemester.GetCourseCategoriesByIDNumber(idnumber)
 	if err != nil {
 		return nil, err
 	}

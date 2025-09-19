@@ -25,12 +25,12 @@ func (s *MoodleTahunAkademikService) AddTahunAkademik(req response.MoodleTahunAk
 	var repoUserInfoData = repository.NewMoodleUserInfoDataRepository(db)
 
 	// Cek apakah TahunAkademik dengan IDNumber yang sama sudah ada
-	existingTahunAkademik, err := repoTahunAkademik.GetFakultasByIDNumber(req.IDNumber)
+	existingTahunAkademik, err := repoTahunAkademik.GetCourseCategoriesByIDNumber(req.IDNumber)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 
-	prodi, err := repoTahunAkademik.GetFakultasByIDNumber(req.Parent)
+	prodi, err := repoTahunAkademik.GetCourseCategoriesByIDNumber(req.Parent)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (s *MoodleTahunAkademikService) AddTahunAkademik(req response.MoodleTahunAk
 		existingTahunAkademik.Description = &req.Description
 		existingTahunAkademik.Parent = prodi.ID
 
-		if err := repoTahunAkademik.UpdateFakultas(existingTahunAkademik); err != nil {
+		if err := repoTahunAkademik.UpdateCourseCategories(existingTahunAkademik); err != nil {
 			return nil, err
 		}
 		TahunAkademik = *existingTahunAkademik
@@ -54,7 +54,7 @@ func (s *MoodleTahunAkademikService) AddTahunAkademik(req response.MoodleTahunAk
 		TahunAkademik.Description = &req.Description
 		TahunAkademik.Parent = prodi.ID
 
-		if err := repoTahunAkademik.AddNewFakultas(&TahunAkademik); err != nil {
+		if err := repoTahunAkademik.CreateCourseCategories(&TahunAkademik); err != nil {
 			return nil, err
 		}
 

@@ -25,13 +25,13 @@ func (s *MoodleProdiService) AddProdi(req response.MoodleProdiRequest, db *gorm.
 		return nil, errors.New("parent is required")
 	}
 
-	fakultas, err := repoProdi.GetFakultasByIDNumber(req.Parent)
+	fakultas, err := repoProdi.GetCourseCategoriesByIDNumber(req.Parent)
 	if err != nil {
 		return nil, err
 	}
 
 	// Cek apakah Prodi dengan IDNumber yang sama sudah ada
-	existingProdi, err := repoProdi.GetFakultasByIDNumber(req.IDNumber)
+	existingProdi, err := repoProdi.GetCourseCategoriesByIDNumber(req.IDNumber)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (s *MoodleProdiService) AddProdi(req response.MoodleProdiRequest, db *gorm.
 		existingProdi.Name = req.Name
 		existingProdi.Description = &req.Description
 		existingProdi.Parent = fakultas.ID
-		if err := repoProdi.UpdateFakultas(existingProdi); err != nil {
+		if err := repoProdi.UpdateCourseCategories(existingProdi); err != nil {
 			return nil, err
 		}
 		Prodi = *existingProdi
@@ -54,7 +54,7 @@ func (s *MoodleProdiService) AddProdi(req response.MoodleProdiRequest, db *gorm.
 		Prodi.Description = &req.Description
 		Prodi.Parent = fakultas.ID
 
-		if err := repoProdi.AddNewFakultas(&Prodi); err != nil {
+		if err := repoProdi.CreateCourseCategories(&Prodi); err != nil {
 			return nil, err
 		}
 
