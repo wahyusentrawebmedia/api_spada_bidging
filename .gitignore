@@ -2,3 +2,5 @@
 .env
 data
 tmp
+
+deploy-package.zip
