@@ -49,7 +49,7 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 	// Hitung kedalaman (Deepth) berdasarkan parent-child relationship
 	Deepth := 1
 	ParentPath := ""
-	currentParent := existingCategories.Parent
+	currentParent := idParent
 	for currentParent != 0 {
 		parentCategory, err := repoCategories.GetCourseCategoriesByID(currentParent)
 		if err != nil {
@@ -66,7 +66,7 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 		existingCategories.Description = &req.Description
 		existingCategories.Depth = int64(Deepth)
 		// Set path dengan ID dia sendiri
-		existingCategories.Path = fmt.Sprintf("/%d", existingCategories.ID)
+		existingCategories.Path = ParentPath + fmt.Sprintf("/%d", existingCategories.ID)
 
 		if idParent != 0 {
 			existingCategories.Parent = idParent
@@ -81,7 +81,7 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 		Categories.Name = req.Name
 		Categories.IDNumber = &req.IDNumber
 		Categories.Description = &req.Description
-		existingCategories.Depth = int64(Deepth)
+		Categories.Depth = int64(Deepth)
 
 		if idParent != 0 {
 			Categories.Parent = idParent
@@ -92,7 +92,7 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 		}
 
 		// Set path dengan ID dia sendiri
-		Categories.Path = fmt.Sprintf("/%d", Categories.ID)
+		Categories.Path = ParentPath + fmt.Sprintf("/%d", Categories.ID)
 
 		// Update path di database setelah create
 		if err := repoCategories.UpdateCourseCategories(&Categories); err != nil {
@@ -128,6 +128,8 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 		if err := repoContext.Create(nil, &context); err != nil {
 			existingContext.Path = ptrString(parentContextPath + fmt.Sprintf("/%d", existingContext.ID))
 		}
+
+		existingContext = &context
 	}
 	// Update path dan depth jika context sudah ada
 	existingContext.Depth = int8(deepthContext)
