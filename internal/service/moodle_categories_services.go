@@ -34,6 +34,8 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 	}
 
 	// get parent
+	Deepth := 1
+	ParentPath := ""
 	idParent := int64(0)
 
 	if req.Parent != "" {
@@ -42,24 +44,21 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 			return nil, err
 		}
 		idParent = fakultas.ID
+		Deepth = int(fakultas.Depth) + 1
+		ParentPath = fakultas.Path
+	} else {
+		parent, err := repoCategories.GetCourseCategoriesByID(1)
+		if err != nil {
+			return nil, err
+		}
+		idParent = parent.ID
+		Deepth = int(parent.Depth) + 1
+		ParentPath = parent.Path
 	}
 
 	var Categories model.MdlCourseCategory
 
 	// Hitung kedalaman (Deepth) berdasarkan parent-child relationship
-	Deepth := 1
-	ParentPath := ""
-	currentParent := idParent
-	for currentParent != 0 {
-		parentCategory, err := repoCategories.GetCourseCategoriesByID(currentParent)
-		if err != nil {
-			break
-		}
-		Deepth++
-		currentParent = parentCategory.Parent
-		ParentPath = parentCategory.Path
-	}
-
 	if existingCategories != nil && existingCategories.ID > 0 {
 		// Jika ada, update data Categories
 		existingCategories.Name = req.Name
