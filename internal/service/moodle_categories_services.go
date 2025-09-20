@@ -57,7 +57,7 @@ func (s *MoodleCategoriesService) CreateourseCategories(req response.MoodleCateg
 		}
 		Deepth++
 		currentParent = parentCategory.Parent
-		ParentPath = parentCategory.Path + "/" + ParentPath
+		ParentPath = parentCategory.Path
 	}
 
 	if existingCategories != nil && existingCategories.ID > 0 {
